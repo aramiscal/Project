@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from list_routes import list_router
 
 app = FastAPI(tile="Shopping List")
-app.include_router(list_router, tags=["List"], prefix="/list")
+app.include_router(list_router, prefix="/list")
 
 @app.get("/")
 async def welcome() -> dict:
