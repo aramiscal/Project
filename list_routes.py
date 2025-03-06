@@ -17,7 +17,7 @@ async def get_items() -> list[Item]:
 async def add_item(list: ListRequest) -> Item:
     global max_id
     max_id += 1 
-    newItem = Item(id=max_id, item=list.name, quantity=list.quantity)
+    newItem = Item(id=max_id, name=list.name, quantity=list.quantity)
     full_list.append(newItem)
     return newItem
 
@@ -28,7 +28,7 @@ async def get_item_by_id(id: Annotated[int, Path(ge=0)]) -> Item:
             return list
         
     raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, detail=f"Item with ID={id} is not found"
+        status_code=status.HTTP_404_NOT_FOUND, detail=f"Item with ID = {id} is not found"
     )
 
 @list_router.delete("/{id}")
@@ -37,7 +37,7 @@ async def delete_item_by_id(id: Annotated[int, Path(ge=0)]) -> dict:
         list = full_list[i]
         if list.id == id:
             full_list.pop(i)
-            return {"msg": f"The item with I{id} is removed"}
+            return {"msg": f"The item with ID = {id} is removed"}
         
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND, detail=f"Item with ID={id} is not found"
