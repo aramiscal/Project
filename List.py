@@ -1,10 +1,10 @@
 from pydantic import BaseModel
 
-class List(BaseModel):
+class Item(BaseModel):
     id: int
-    item: str
+    name: str
     quantity: int
 
 class ListRequest(BaseModel): 
-    item: str
+    name: str
     quantity: int
