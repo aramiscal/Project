@@ -1,4 +1,4 @@
-const api = "http://127.0.0.1:8000";
+const api = "https://ShoppingList.com/api/data";
 
 const displayList = (list) => {
   const tbody = document.getElementById("list-rows");
@@ -15,6 +15,7 @@ const displayList = (list) => {
 
 const getList = () => {
   const xhr = new XMLHttpRequest();
+  console.log(xhr);
   xhr.onreadystatechange = () => {
     if (xhr.readyState == 4 && xhr.status == 200) {
       data = JSON.parse(xhr.responseText);
@@ -23,7 +24,7 @@ const getList = () => {
     }
   };
 
-  xhr.open('GET', api, true);
+  xhr.open("GET", api, true);
   xhr.send();
 };
 
