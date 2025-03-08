@@ -14,18 +14,18 @@ const displayList = (list) => {
 };
 
 const getList = () => {
-    const xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState == 4 && xhr.status == 200) {
-        data = JSON.parse(xhr.responseText);
-        console.log(data);
-        displayTodos(data);
-      }
-    };
-  
-    xhr.open('GET', api, true);
-    xhr.send();
+  const xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState == 4 && xhr.status == 200) {
+      data = JSON.parse(xhr.responseText);
+      console.log(data);
+      displayList(data);
+    }
   };
+
+  xhr.open('GET', api, true);
+  xhr.send();
+};
 
 (() => {
   getList();
