@@ -15,7 +15,6 @@ const displayList = (list) => {
 
 const getList = () => {
   const xhr = new XMLHttpRequest();
-  console.log(xhr);
   xhr.onreadystatechange = () => {
     if (xhr.readyState == 4 && xhr.status == 200) {
       data = JSON.parse(xhr.responseText);
