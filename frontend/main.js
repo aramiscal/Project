@@ -1,4 +1,4 @@
-const api = "https://ShoppingList.com/api/data";
+const api = "http://127.0.0.1:8000";
 
 const displayList = (list) => {
   const tbody = document.getElementById("list-rows");
