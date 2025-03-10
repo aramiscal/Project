@@ -1,4 +1,4 @@
-const api = "http://127.0.0.1:8000";
+const api = "http://127.0.0.1:8000/list";
 
 const displayList = (list) => {
   const tbody = document.getElementById("list-rows");
