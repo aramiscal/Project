@@ -5,8 +5,8 @@ const displayList = (list) => {
   tbody.innerHTML = "";
   const rows = list.map((x) => {
     return `<tr>
-            <td>${x.id}</td>
             <td>${x.name}</td>
+            <td>${x.type}</td>
             <td>${x.quantity}</td>
         </tr>`;
   });

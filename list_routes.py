@@ -1,5 +1,4 @@
-from typing import Annotated
-from fastapi import APIRouter, HTTPException, Path, status
+from fastapi import APIRouter, HTTPException, status
 
 from list import Item, ListRequest
 
@@ -15,29 +14,17 @@ async def get_items() -> list[Item]:
 
 @list_router.post("", status_code=status.HTTP_201_CREATED)
 async def add_item(list: ListRequest) -> Item:
-    global max_id
-    max_id += 1 
-    newItem = Item(id=max_id, name=list.name, quantity=list.quantity)
+    newItem = Item(name=list.name, type=list.type, quantity=list.quantity)
     full_list.append(newItem)
     return newItem
 
-@list_router.get("/{id}")
-async def get_item_by_id(id: Annotated[int, Path(ge=0)]) -> Item:
-    for list in full_list:
-        if list.id == id:
-            return list
-        
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, detail=f"Item with ID = {id} is not found"
-    )
-
 @list_router.delete("/{id}")
-async def delete_item_by_id(id: Annotated[int, Path(ge=0)]) -> dict:
+async def delete_item_by_name(name: str) -> dict:
     for i in range(len(full_list)):
         list = full_list[i]
-        if list.id == id:
+        if list.id == name:
             full_list.pop(i)
-            return {"msg": f"The item with ID = {id} is removed"}
+            return {"msg": f"The item with Name = {name} is removed"}
         
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND, detail=f"Item with ID={id} is not found"
