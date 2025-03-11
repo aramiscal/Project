@@ -7,10 +7,11 @@ const addPrice = (list) => {
   for(let i = 0; i < list.length; i++) {
     total_price = total_price + list[i].price;
   }
-  return total_price;
+  p.innerHTML += total_price;
 }
 
 const displayList = (list) => {
+  list.sort((a,b) => a.type.localeCompare(b.type));
   const tbody = document.getElementById("list-rows");
   tbody.innerHTML = "";
   const rows = list.map((x) => {
