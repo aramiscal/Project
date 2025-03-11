@@ -14,11 +14,11 @@ async def get_items() -> list[Item]:
 
 @list_router.post("", status_code=status.HTTP_201_CREATED)
 async def add_item(list: ListRequest) -> Item:
-    newItem = Item(name=list.name, type=list.type, quantity=list.quantity)
+    newItem = Item(name=list.name, type=list.type, quantity=list.quantity, price=list.price)
     full_list.append(newItem)
     return newItem
 
-@list_router.delete("/{id}")
+@list_router.delete("/{name}")
 async def delete_item_by_name(name: str) -> dict:
     for i in range(len(full_list)):
         list = full_list[i]

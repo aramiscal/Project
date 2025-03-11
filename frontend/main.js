@@ -1,5 +1,15 @@
 const api = "http://127.0.0.1:8000/list";
 
+let total_price = 0;
+
+const addPrice = (list) => {
+  const p = document.getElementById("total-price");
+  for(let i = 0; i < list.length; i++) {
+    total_price = total_price + list[i].price;
+  }
+  return total_price;
+}
+
 const displayList = (list) => {
   const tbody = document.getElementById("list-rows");
   tbody.innerHTML = "";
@@ -8,6 +18,8 @@ const displayList = (list) => {
             <td>${x.name}</td>
             <td>${x.type}</td>
             <td>${x.quantity}</td>
+            <td>$${x.price}</td>
+            <td></td>
         </tr>`;
   });
   tbody.innerHTML = rows.join(" ");
@@ -18,8 +30,8 @@ const getList = () => {
   xhr.onreadystatechange = () => {
     if (xhr.readyState == 4 && xhr.status == 200) {
       data = JSON.parse(xhr.responseText);
-      console.log(data);
       displayList(data);
+      addPrice(data);
     }
   };
 
