@@ -22,7 +22,6 @@ const postItem = () => {
   const priceInput = document.getElementById('new-price').value;
   const priceToInt = parseInt(priceInput, 10);
 
-  console.log(typeof priceToInt);
   const xhr = new XMLHttpRequest();
   xhr.onreadystatechange = () => {
     if (xhr.readyState == 4 && xhr.status == 201) {
@@ -40,6 +39,20 @@ const postItem = () => {
   }));
 }
 
+const deleteItem = (name) => {
+  console.log(`deleting item name=${name}`);
+  const xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState == 4 && xhr.status == 200) {
+      getList();
+      console.log(`deleted item name=${name}`);
+    }
+  };
+
+  xhr.open('DELETE', `${api}/${name}`, true);
+  xhr.send();
+};
+
 const displayList = (list) => {
   list.sort((a,b) => a.type.localeCompare(b.type));
   const tbody = document.getElementById("list-rows");
@@ -50,7 +63,7 @@ const displayList = (list) => {
             <td>${x.type}</td>
             <td>${x.quantity}</td>
             <td>$${x.price}</td>
-            <td></td>
+            <td><button onClick="deleteItem('${x.name}')" type="button" class="btn btn-danger">Delete</button></td>
         </tr>`;
   });
   tbody.innerHTML = rows.join(" ");

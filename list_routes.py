@@ -21,8 +21,7 @@ async def add_item(list: ListRequest) -> Item:
 @list_router.delete("/{name}")
 async def delete_item_by_name(name: str) -> dict:
     for i in range(len(full_list)):
-        list = full_list[i]
-        if list.id == name:
+        if full_list[i].name == name:
             full_list.pop(i)
             return {"msg": f"The item with Name = {name} is removed"}
         
