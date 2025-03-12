@@ -9,6 +9,13 @@ const addPrice = (list) => {
   p.innerHTML = total_price;
 }
 
+const resetInput = () => {
+  document.getElementById('new-name').value = '';
+  document.getElementById('new-quantity').value = '';
+  document.getElementById('new-type').value = '';
+  document.getElementById('new-price').value = '';
+}
+
 document.getElementById('add-item').addEventListener('click', (e) => {
   e.preventDefault();
   postItem();
@@ -26,6 +33,7 @@ const postItem = () => {
   xhr.onreadystatechange = () => {
     if (xhr.readyState == 4 && xhr.status == 201) {
       getList();
+      resetInput();
     }
   };
 
@@ -40,12 +48,10 @@ const postItem = () => {
 }
 
 const deleteItem = (name) => {
-  console.log(`deleting item name=${name}`);
   const xhr = new XMLHttpRequest();
   xhr.onreadystatechange = () => {
     if (xhr.readyState == 4 && xhr.status == 200) {
       getList();
-      console.log(`deleted item name=${name}`);
     }
   };
 
