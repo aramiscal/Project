@@ -26,5 +26,5 @@ async def delete_item_by_name(name: str) -> dict:
             return {"msg": f"The item with Name = {name} is removed"}
         
     raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, detail=f"Item with ID={id} is not found"
+        status_code=status.HTTP_404_NOT_FOUND, detail=f"Item with Name={name} is not found"
     )

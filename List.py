@@ -4,10 +4,10 @@ class Item(BaseModel):
     name: str
     type: str
     quantity: int
-    price: int
+    price: float
 
 class ListRequest(BaseModel): 
     name: str
     type: str
     quantity: int
-    price: int
+    price: float

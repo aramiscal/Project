@@ -27,7 +27,7 @@ const postItem = () => {
   const quantityToInt = parseInt(quantityInput, 10);
   const typeInput = document.getElementById('new-type').value;
   const priceInput = document.getElementById('new-price').value;
-  const priceToInt = parseInt(priceInput, 10);
+  const priceToInt = parseFloat(priceInput);
 
   const xhr = new XMLHttpRequest();
   xhr.onreadystatechange = () => {
