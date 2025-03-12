@@ -1,13 +1,43 @@
 const api = "http://127.0.0.1:8000/list";
 
-let total_price = 0;
-
 const addPrice = (list) => {
-  const p = document.getElementById("total-price");
+  let total_price = 0;
+  const p = document.getElementById("update-price");
   for(let i = 0; i < list.length; i++) {
     total_price = total_price + list[i].price;
   }
-  p.innerHTML += total_price;
+  p.innerHTML = total_price;
+}
+
+document.getElementById('add-item').addEventListener('click', (e) => {
+  e.preventDefault();
+  postItem();
+})
+
+const postItem = () => {
+  const nameInput = document.getElementById('new-name').value;
+  const quantityInput = document.getElementById('new-quantity').value;
+  const quantityToInt = parseInt(quantityInput, 10);
+  const typeInput = document.getElementById('new-type').value;
+  const priceInput = document.getElementById('new-price').value;
+  const priceToInt = parseInt(priceInput, 10);
+
+  console.log(typeof priceToInt);
+  const xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState == 4 && xhr.status == 201) {
+      getList();
+    }
+  };
+
+  xhr.open('POST', api, true);
+  xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+  xhr.send(JSON.stringify({ 
+    name: nameInput, 
+    type: typeInput, 
+    quantity: quantityToInt, 
+    price: priceToInt 
+  }));
 }
 
 const displayList = (list) => {

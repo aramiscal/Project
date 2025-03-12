@@ -26,6 +26,9 @@
         border: 1px solid black;
         font-size: larger;
       }
+      table {
+        margin-top: 20px;
+      }
       th {
         text-align: center;
       }
@@ -37,10 +40,63 @@
         font-size: large;
         text-align: center;
       }
+      .box {
+        width: 500px;
+        height: auto;
+        border: 3px solid black;
+        background-color: lightgray;
+        padding: 20px;
+        margin: 0 auto;
+      }
     </style>
   </head>
   <body>
     <h1>Shopping List</h1>
+
+    <!-- Adding Items Box -->
+    <div class="box">
+      <div class="input-group mb-3">
+        <input
+          id="new-name"
+          type="text"
+          class="form-control"
+          placeholder="Item"
+          aria-label="Item"
+        />
+        <span class="input-group-text">#</span>
+        <input
+          id="new-quantity"
+          type="text"
+          class="form-control"
+          placeholder="Quantity"
+          aria-label="Quantity"
+        />
+      </div>
+      <div class="input-group mb-3">
+        <label class="input-group-text" for="inputGroupSelect01">Type</label>
+        <select class="form-select" id="new-type">
+          <option selected>Choose...</option>
+          <option value="Fruit">Fruit</option>
+          <option value="Vegetable">Vegetable</option>
+          <option value="Meat">Meat</option>
+          <option value="Seafood">Seafood</option>
+          <option value="Dairy">Dairy</option>
+        </select>
+      </div>
+      <div class="input-group input-group-sm mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-sm">$</span>
+        <input
+          id="new-price"
+          type="num"
+          min="0"
+          aria-label="Price"
+          aria-describedby="Price"
+        />
+      </div>
+      <button id="add-item" type="button" class="button">Add Item</button>
+    </div>
+
+    <!-- Table -->
     <table class="center">
       <thead>
         <tr>
@@ -54,8 +110,9 @@
       <tbody id="list-rows"></tbody>
     </table>
     <div>
-      <p id="total-price">
+      <p>
         <b>Total: $</b>
+        <span id="update-price"></span>
       </p>
     </div>
     <script>
