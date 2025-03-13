@@ -26,7 +26,7 @@
         font-size: larger;
       }
       table {
-        width: 75%;
+        width: 65%;
         margin-top: 20px;
         border: 5px solid black;
       }
@@ -65,7 +65,7 @@
 
     <!-- Adding Items Box -->
     <div class="box">
-      <div class="input-group mb-3">
+      <div class="input-group mb-3"> <!-- Input Item -->
         <input
           id="new-name"
           type="text"
@@ -73,7 +73,7 @@
           placeholder="Item"
           aria-label="Item"
         />
-        <span class="input-group-text">#</span>
+        <span class="input-group-text">#</span> <!-- Input Quanitity -->
         <input
           id="new-quantity"
           type="text"
@@ -83,7 +83,7 @@
         />
       </div>
       <div class="input-group mb-3">
-        <label class="input-group-text" for="inputGroupSelect01">Type</label>
+        <label class="input-group-text" for="inputGroupSelect01">Type</label> <!-- Input Type -->
         <select class="form-select" id="new-type">
           <option selected>Choose...</option>
           <option value="Fruit">Fruit</option>
@@ -95,7 +95,7 @@
         </select>
       </div>
       <div class="input-group input-group-sm mb-3">
-        <span class="input-group-text" id="inputGroup-sizing-sm">$</span>
+        <span class="input-group-text" id="inputGroup-sizing-sm">$</span> <!-- Input Price -->
         <input
           id="new-price"
           type="num"
@@ -104,7 +104,7 @@
           aria-describedby="Price"
         />
       </div>
-      <button id="add-item" type="button" class="button">Add Item</button>
+      <button id="add-item" type="button" class="button">Add Item</button> <!-- Add Button -->
     </div>
 
     <!-- Table -->
