@@ -4,6 +4,12 @@
 - Add: Click on "Add Item" button and item is added to the table
 - Delete: Click on "Delete" button from the table
 
-## Code
-
 ## Website
+<img width="1421" alt="Screenshot 2025-03-15 at 4 11 00 PM" src="https://github.com/user-attachments/assets/fbf70780-89c2-42fd-93a8-bb0d7cf40a0a" />
+
+
+### Features
+- Pressing "Add Item" won't do anything if all input values aren't filled in
+- Input values clear once "Add Item" is clicked
+- Table is sorted by Type or "Aisle"
+- Total cost updates when you add or delete an item
