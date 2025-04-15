@@ -1,6 +1,7 @@
 from pydantic import BaseModel
+from beanie import Document
 
-class Item(BaseModel):
+class Item(Document):
     name: str
     type: str
     quantity: int

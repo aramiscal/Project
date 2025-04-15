@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 
-from list import Item, ListRequest
+from models.list import Item, ListRequest
 
 max_id: int = 0
 
@@ -10,12 +10,12 @@ full_list = []
 
 @list_router.get("")
 async def get_items() -> list[Item]:
-    return full_list
+    return await Item.find_all().to_list()
 
 @list_router.post("", status_code=status.HTTP_201_CREATED)
 async def add_item(list: ListRequest) -> Item:
     newItem = Item(name=list.name, type=list.type, quantity=list.quantity, price=list.price)
-    full_list.append(newItem)
+    await Item.insert_one(newItem)
     return newItem
 
 @list_router.delete("/{name}")
