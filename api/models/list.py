@@ -7,6 +7,9 @@ class Item(Document):
     quantity: int
     price: float
 
+    class Settings:
+        name = "products"
+
 class ListRequest(BaseModel): 
     name: str
     type: str
