@@ -1,9 +1,10 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 
 from auth.jwt_auth import Token, TokenData, create_access_token, decode_jwt_token
+from models.user import User
 
 pwd_context = CryptContext(schemes=["bcrypt"])
 
@@ -38,11 +39,14 @@ async def login_for_access_token(
 ) -> Token:
     ## Authenticate user by verifying the user in DB
     username = form_data.username
-    for u in in_memory_db:
-        if u["username"] == username:
-            authenticated = hash_password.verify_hash(form_data.password, u["password"])
-            if authenticated:
-                access_token = create_access_token({"username": username})
-                return Token(access_token=access_token)
-
+    existing_user = await User.find_one(User.username == username)
+    if not existing_user:
+        raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail="Username or Password is invalid.")
+    
+    authenticated = hash_password.verify_hash(form_data.password, existing_user.password)
+    if authenticated:
+        access_token = create_access_token({"username": username})
+        return Token(access_token=access_token)
+    
+    
     return HTTPException(status_code=401, detail="Invalid username or password")
