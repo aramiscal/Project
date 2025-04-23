@@ -6,6 +6,7 @@ class User(Document):
     username: str
     email: str
     password: str # ash $ salted password in the database
+    role: str = ""
 
     class Settings:
         name = "users"  # by default, if not having this settings, then the collection name is "Product"

@@ -38,7 +38,8 @@
         border: none;
         border-top: 2px;
       }
-      th, td {
+      th,
+      td {
         text-align: center;
         padding: 10px;
       }
@@ -63,9 +64,16 @@
   <body>
     <h1>Shopping List</h1>
 
+    <div class="input-group">
+      <span class="input-group-text">Username and Password</span>
+      <input type="text" aria-label="Username" class="form-control" />
+      <input type="text" aria-label="Password" class="form-control" />
+    </div>
+
     <!-- Adding Items Box -->
     <div class="box">
-      <div class="input-group mb-3"> <!-- Input Item -->
+      <div class="input-group mb-3">
+        <!-- Input Item -->
         <input
           id="new-name"
           type="text"
@@ -73,7 +81,8 @@
           placeholder="Item"
           aria-label="Item"
         />
-        <span class="input-group-text">#</span> <!-- Input Quanitity -->
+        <span class="input-group-text">#</span>
+        <!-- Input Quanitity -->
         <input
           id="new-quantity"
           type="text"
@@ -83,7 +92,8 @@
         />
       </div>
       <div class="input-group mb-3">
-        <label class="input-group-text" for="inputGroupSelect01">Type</label> <!-- Input Type -->
+        <label class="input-group-text" for="inputGroupSelect01">Type</label>
+        <!-- Input Type -->
         <select class="form-select" id="new-type">
           <option selected>Choose...</option>
           <option value="Fruit">Fruit</option>
@@ -95,7 +105,8 @@
         </select>
       </div>
       <div class="input-group input-group-sm mb-3">
-        <span class="input-group-text" id="inputGroup-sizing-sm">$</span> <!-- Input Price -->
+        <span class="input-group-text" id="inputGroup-sizing-sm">$</span>
+        <!-- Input Price -->
         <input
           id="new-price"
           type="num"
@@ -104,7 +115,8 @@
           aria-describedby="Price"
         />
       </div>
-      <button id="add-item" type="button" class="button">Add Item</button> <!-- Add Button -->
+      <button id="add-item" type="button" class="button">Add Item</button>
+      <!-- Add Button -->
     </div>
 
     <!-- Table -->

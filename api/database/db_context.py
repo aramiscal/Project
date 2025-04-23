@@ -7,7 +7,9 @@ from models.user import User
 
 import certifi
 import os
-os.environ['SSL_CERT_FILE'] = certifi.where()
+
+os.environ["SSL_CERT_FILE"] = certifi.where()
+
 
 async def init_database():
     my_config = get_setting()
