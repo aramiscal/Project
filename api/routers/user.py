@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 
-from api.auth.jwt_auth import Token, TokenData, create_access_token, decode_jwt_token
-from api.models.user import User, UserRequest
+from auth.jwt_auth import Token, TokenData, create_access_token, decode_jwt_token
+from models.user import User, UserRequest
 
 pwd_context = CryptContext(schemes=["bcrypt"])
 
