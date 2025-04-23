@@ -1,9 +1,9 @@
 from beanie import init_beanie
-from models.my_config import get_settings
+from api.models.my_config import get_settings
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from models.list import Item
-from models.user import User
+from api.models.list import Item
+from api.models.user import User
 
 import certifi
 import os
