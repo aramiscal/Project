@@ -9,5 +9,5 @@ class MyConfig(BaseSettings):
     model_config = SettingsConfigDict(env_file="./venv/.env")
 
 @lru_cache
-def get_setting():
+def get_settings():
     return MyConfig()
