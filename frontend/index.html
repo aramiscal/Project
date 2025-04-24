@@ -20,6 +20,11 @@
         font-size: xx-large;
         font-style: italic;
       }
+      h5 {
+        margin-left: 500px;
+        margin-right: 500px;
+        font-size: large;
+      }
       table,
       th,
       td {
@@ -63,13 +68,26 @@
   </head>
   <body>
     <h1>Shopping List</h1>
-
-    <div class="input-group">
-      <span class="input-group-text">Username and Password</span>
-      <input type="text" aria-label="Username" class="form-control" />
-      <input type="text" aria-label="Password" class="form-control" />
-    </div>
-
+    <h5>
+      <!-- Sign Up Form -->
+      <form>
+        <div class="row mb-3">
+          <label for="inputEmail3" class="col-sm-2 col-form-label">Email</label>
+          <div class="col-sm-10">
+            <input type="email" class="form-control" id="inputEmail3" />
+          </div>
+        </div>
+        <div class="row mb-3">
+          <label for="inputPassword3" class="col-sm-2 col-form-label"
+            >Password</label
+          >
+          <div class="col-sm-10">
+            <input type="password" class="form-control" id="inputPassword3" />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Sign in</button>
+      </form>
+    </h5>
     <!-- Adding Items Box -->
     <div class="box">
       <div class="input-group mb-3">
