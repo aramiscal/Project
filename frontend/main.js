@@ -1,4 +1,4 @@
-const api = "http://127.0.0.1:8000/list";
+const api = "/list";
 
 const addPrice = (list) => {
   let total_price = 0;
@@ -94,4 +94,5 @@ const getList = () => {
 
 (() => {
   initAuth();
+  getList();
 })();

@@ -40,7 +40,7 @@ async def sign_up(user: UserRequest):
     new_user = User(username=user.username, password=hashed_pwd, email=user.email)
     await new_user.insert()
     print(f"User created: {user.username}")
-    return {"message": "User create successfully!"}
+    return {"message": "User create successfully"}
 
 
 @user_router.post("/sign-in")

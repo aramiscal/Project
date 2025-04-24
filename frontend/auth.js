@@ -41,8 +41,6 @@ const updateUI = () => {
 
 // Sign Up
 const signUp = (username, email, password) => {
-  console.log("signUp function called with:", { username, email });  // Log 1: Function entry
-
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = () => {
@@ -58,7 +56,7 @@ const signUp = (username, email, password) => {
         }
       }
     };
-    xhr.open("POST", "http://127.0.0.1:8000/users/signup", true);
+    xhr.open("POST", "/users/signup", true);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.send(JSON.stringify({ username, email, password }));
   });
@@ -89,7 +87,7 @@ const signIn = (username, password) => {
     formData.append("username", username);
     formData.append("password", password);
 
-    xhr.open("POST", "http://127.0.0.1:8000/users/sign-in", true);
+    xhr.open("POST", "/users/sign-in", true);
     xhr.send(formData);
   });
 };
