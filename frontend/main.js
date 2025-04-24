@@ -39,6 +39,7 @@ const postItem = () => {
 
   xhr.open('POST', api, true);
   xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+  addAuthHeader(xhr);
   xhr.send(JSON.stringify({ 
     name: nameInput, 
     type: typeInput, 
@@ -56,6 +57,7 @@ const deleteItem = (name) => {
   };
 
   xhr.open('DELETE', `${api}/${name}`, true);
+  addAuthHeader(xhr);
   xhr.send();
 };
 
@@ -86,6 +88,7 @@ const getList = () => {
   };
 
   xhr.open("GET", api, true);
+  addAuthHeader(xhr);
   xhr.send();
 };
 

@@ -54,7 +54,7 @@ async def login_for_access_token(
     
     authenticated = hash_password.verify_hash(form_data.password, existing_user.password)
     if authenticated:
-        access_token = create_access_token({"username": username})
+        access_token = create_access_token({"username": username, "role": existing_user.role})
         return Token(access_token=access_token)
     
 
