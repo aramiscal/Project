@@ -82,3 +82,62 @@ const signOut = () => {
     updateUI();
 }
 
+// Initialize auth state
+const initAuth = () => {
+  updateUI();
+  
+  // Set up event listeners for auth forms
+  document.getElementById('sign-up-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const username = document.getElementById('signup-username').value;
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    
+    try {
+      await signUp(username, email, password);
+      // After successful signup, switch to the sign-in tab
+      document.getElementById('signin-tab').click();
+      document.getElementById('signin-username').value = username;
+      document.getElementById('signin-password').value = '';
+      
+      showAlert('Sign-up successful! Please sign in.', 'success');
+    } catch (error) {
+      showAlert(error.detail || 'Sign-up failed. Please try again.', 'danger');
+    }
+  });
+  
+  document.getElementById('sign-in-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const username = document.getElementById('signin-username').value;
+    const password = document.getElementById('signin-password').value;
+    
+    try {
+      await signIn(username, password);
+      showAlert(`Welcome back, ${username}!`, 'success');
+      updateUI();
+    } catch (error) {
+      showAlert(error.detail || 'Sign-in failed. Please check your credentials.', 'danger');
+    }
+  });
+  
+  document.getElementById('sign-out-btn').addEventListener('click', () => {
+    signOut();
+    showAlert('You have been signed out.', 'info');
+  });
+};
+
+// Display alert messages
+const showAlert = (message, type = 'info') => {
+  const alertContainer = document.getElementById('alert-container');
+  const alert = document.createElement('div');
+  alert.className = `alert alert-${type} alert-dismissible fade show`;
+  alert.role = 'alert';
+  alert.innerHTML = `
+    ${message}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  `;
+  
+  alertContainer.appendChild(alert);
+};

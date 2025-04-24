@@ -1,8 +1,23 @@
-from fastapi import APIRouter, HTTPException, status
+from typing import Annotated
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 
+from api.auth.jwt_auth import TokenData, decode_jwt_token
 from api.models.list import Item, ListRequest
 
 max_id: int = 0
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/sign-in")
+
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> TokenData:
+    token_data = decode_jwt_token(token)
+    if token_data is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return token_data
 
 list_router = APIRouter()
 

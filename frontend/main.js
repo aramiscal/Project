@@ -93,5 +93,5 @@ const getList = () => {
 };
 
 (() => {
-  getList();
+  initAuth();
 })();
