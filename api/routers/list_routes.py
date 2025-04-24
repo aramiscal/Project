@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 
-from models.list import Item, ListRequest
+from api.models.list import Item, ListRequest
 
 max_id: int = 0
 
