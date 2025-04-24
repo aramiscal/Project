@@ -18,7 +18,7 @@
       h1 {
         text-align: center;
         font-size: xx-large;
-        font-style: italic;
+        font-style: bold;
       }
       h5 {
         margin-left: 500px;
@@ -69,6 +69,8 @@
   <body>
     <h1>Shopping List</h1>
 
+    <hr />
+
     <!-- Alert -->
     <div id="alert-container" class="container mt-3"></div>
 
@@ -79,110 +81,112 @@
         Sign Out
       </button>
     </div>
-
-    <!-- Authentication Container -->
-    <div id="auth-container" class="auth-container">
-      <ul class="nav nav-tabs" id="auth-tab" role="tablist">
-        <li class="nav-item" role="presentation">
-          <button
-            class="nav-link active"
-            id="signin-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#signin"
-            type="button"
-            role="tab"
-            aria-controls="signin"
-            aria-selected="true"
+    <h5>
+      <!-- Authentication Container -->
+      <div id="auth-container" class="auth-container">
+        <ul class="nav nav-tabs" id="auth-tab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link active"
+              id="signin-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#signin"
+              type="button"
+              role="tab"
+              aria-controls="signin"
+              aria-selected="true"
+            >
+              Sign In
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="signup-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#signup"
+              type="button"
+              role="tab"
+              aria-controls="signup"
+              aria-selected="false"
+            >
+              Sign Up
+            </button>
+          </li>
+        </ul>
+        <div class="tab-content pt-3" id="auth-tab-content">
+          <!-- Sign In Form -->
+          <div
+            class="tab-pane fade show active"
+            id="signin"
+            role="tabpanel"
+            aria-labelledby="signin-tab"
           >
-            Sign In
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button
-            class="nav-link"
-            id="signup-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#signup"
-            type="button"
-            role="tab"
-            aria-controls="signup"
-            aria-selected="false"
-          >
-            Sign Up
-          </button>
-        </li>
-      </ul>
-      <div class="tab-content pt-3" id="auth-tab-content">
-        <!-- Sign In Form -->
-        <div
-          class="tab-pane fade show active"
-          id="signin"
-          role="tabpanel"
-          aria-labelledby="signin-tab"
-        >
-          <form id="sign-in-form">
-            <div class="mb-3">
-              <label for="signin-username" class="form-label">Username</label>
-              <input
-                type="text"
-                class="form-control"
-                id="signin-username"
-                required
-              />
-            </div>
-            <div class="mb-3">
-              <label for="signin-password" class="form-label">Password</label>
-              <input
-                type="password"
-                class="form-control"
-                id="signin-password"
-                required
-              />
-            </div>
-            <button type="submit" class="btn btn-primary">Sign In</button>
-          </form>
-        </div>
+            <form id="sign-in-form">
+              <div class="mb-3">
+                <label for="signin-username" class="form-label">Username</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="signin-username"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="signin-password" class="form-label">Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="signin-password"
+                  required
+                />
+              </div>
+              <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+          </div>
 
-        <!-- Sign Up Form -->
-        <div
-          class="tab-pane fade"
-          id="signup"
-          role="tabpanel"
-          aria-labelledby="signup-tab"
-        >
-          <form id="sign-up-form">
-            <div class="mb-3">
-              <label for="signup-username" class="form-label">Username</label>
-              <input
-                type="text"
-                class="form-control"
-                id="signup-username"
-                required
-              />
-            </div>
-            <div class="mb-3">
-              <label for="signup-email" class="form-label">Email</label>
-              <input
-                type="email"
-                class="form-control"
-                id="signup-email"
-                required
-              />
-            </div>
-            <div class="mb-3">
-              <label for="signup-password" class="form-label">Password</label>
-              <input
-                type="password"
-                class="form-control"
-                id="signup-password"
-                required
-              />
-            </div>
-            <button type="submit" class="btn btn-primary">Sign Up</button>
-          </form>
+          <!-- Sign Up Form -->
+          <div
+            class="tab-pane fade"
+            id="signup"
+            role="tabpanel"
+            aria-labelledby="signup-tab"
+          >
+            <form id="sign-up-form">
+              <div class="mb-3">
+                <label for="signup-username" class="form-label">Username</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="signup-username"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="signup-email" class="form-label">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="signup-email"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="signup-password" class="form-label">Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="signup-password"
+                  required
+                />
+              </div>
+              <button type="submit" class="btn btn-primary">Sign Up</button>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </h5>
+
     <!-- Adding Items Box -->
     <div class="box">
       <div class="input-group mb-3">
@@ -258,6 +262,7 @@
         "sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz";
       crossorigin = "anonymous";
     </script>
+    <script src="auth.js"></script>
     <script src="main.js">
       /* main.js script here */
     </script>

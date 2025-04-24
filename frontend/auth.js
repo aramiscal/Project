@@ -23,6 +23,20 @@ const addAuthHeader = (xhr) => {
   }
 };
 
+// Update UI (Signin/Signup)
+const updateUI = () => {
+  const isAuthenticated = isLoggedIn();
+  
+  document.getElementById('auth-container').style.display = isAuthenticated ? 'none' : 'block';
+  document.getElementById('signed-in-user').style.display = isAuthenticated ? 'block' : 'none';
+  
+  if (isAuthenticated) {
+    // You might want to decode the JWT to get the username
+    // This is a simplified approach
+    document.getElementById('username-display').textContent = "Authenticated User";
+  }
+};
+
 // Sign Up
 const signUp = (username, email, password) => {
   return new Promise((resolve, reject) => {
