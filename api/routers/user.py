@@ -30,15 +30,16 @@ user_router = APIRouter()
 
 
 @user_router.post("/signup")
-async def sign_up(user: UserRequest): 
+async def sign_up(user: UserRequest):
     existing_user = await User.find_one(User.username == user.username)
 
     if existing_user:
         raise HTTPException(status_code=400, detail="User already exists")
 
     hashed_pwd = hash_password.create_hash(user.password)
-    new_user = User(username = user.username, password = hashed_pwd, email=user.email)
-    await new_user.create()
+    new_user = User(username=user.username, password=hashed_pwd, email=user.email)
+    await new_user.insert()
+    print(f"User created: {user.username}")
     return {"message": "User create successfully!"}
 
 
@@ -50,12 +51,18 @@ async def login_for_access_token(
     username = form_data.username
     existing_user = await User.find_one(User.username == username)
     if not existing_user:
-        raise HTTPException(status_code= status.HTTP_401_UNAUTHORIZED, detail="Username or Password is invalid.")
-    
-    authenticated = hash_password.verify_hash(form_data.password, existing_user.password)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Username or Password is invalid.",
+        )
+
+    authenticated = hash_password.verify_hash(
+        form_data.password, existing_user.password
+    )
     if authenticated:
-        access_token = create_access_token({"username": username, "role": existing_user.role})
+        access_token = create_access_token(
+            {"username": username, "role": existing_user.role}
+        )
         return Token(access_token=access_token)
-    
 
     return HTTPException(status_code=404, detail="Invalid username or password")
