@@ -7,6 +7,10 @@ const storeUserInfo = (username) => {
   localStorage.setItem("username", username);
 };
 
+const getUsername = () => {
+  return localStorage.getItem("username");
+}
+
 // Remove token when logging out
 const removeToken = () => {
   localStorage.removeItem("access_token");
@@ -76,17 +80,26 @@ const signUp = (username, email, password) => {
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
-        if (xhr.status === 200) {
+        if (xhr.status === 201) {
+          // 201 Created status - success
           resolve(JSON.parse(xhr.responseText));
         } else {
-          reject(
-            xhr.status !== 0
-              ? JSON.parse(xhr.responseText)
-              : { detail: "Network error" }
-          );
+          // Handle error responses
+          let errorMessage = "Network error";
+          try {
+            if (xhr.responseText) {
+              const errorResponse = JSON.parse(xhr.responseText);
+              errorMessage = errorResponse.detail || "Sign-up failed";
+            }
+          } catch (e) {
+            // If parsing fails, use default error message
+            errorMessage = "Something went wrong during sign-up";
+          }
+          reject({ detail: errorMessage });
         }
       }
     };
+
     xhr.open("POST", "/users/signup", true);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.send(JSON.stringify({ username, email, password }));
@@ -108,13 +121,19 @@ const signIn = (username, password) => {
         if (xhr.status === 200) {
           const response = JSON.parse(xhr.responseText);
           storeToken(response.access_token);
+          storeUserInfo(username); // Store username for display
           resolve(response);
         } else {
-          reject(
-            xhr.status !== 0
-              ? JSON.parse(xhr.responseText)
-              : { detail: "Network error" }
-          );
+          let errorMessage = "Network error";
+          try {
+            if (xhr.responseText) {
+              const errorResponse = JSON.parse(xhr.responseText);
+              errorMessage = errorResponse.detail || "Sign-in failed";
+            }
+          } catch (e) {
+            errorMessage = "Something went wrong during sign-in";
+          }
+          reject({ detail: errorMessage });
         }
       }
     };
@@ -148,6 +167,20 @@ const initAuth = () => {
       const username = document.getElementById("signup-username").value;
       const email = document.getElementById("signup-email").value;
       const password = document.getElementById("signup-password").value;
+      const confirmPassword = document.getElementById(
+        "signup-confirm-password"
+      ).value;
+
+      if (password !== confirmPassword) {
+        showAlert("Passwords do not match", "danger");
+        return;
+      }
+
+      // Get the submit button to show loading state
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = "Signing up...";
+      submitBtn.disabled = true;
 
       try {
         await signUp(username, email, password);
@@ -175,6 +208,12 @@ const initAuth = () => {
 
       const username = document.getElementById("signin-username").value;
       const password = document.getElementById("signin-password").value;
+
+      // Get the submit button to show loading state
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = "Signing in...";
+      submitBtn.disabled = true;
 
       try {
         await signIn(username, password);
@@ -219,5 +258,6 @@ window.auth = {
   getToken,
   addAuthHeader,
   signOut,
-  showAlert
-}
+  showAlert,
+  getUsername
+};
