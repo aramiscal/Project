@@ -1,4 +1,7 @@
 import asyncio
+import os
+import certifi
+import ssl
 from beanie import init_beanie
 from api.models.my_config import get_settings
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -7,20 +10,16 @@ from pymongo.errors import ServerSelectionTimeoutError, ConnectionFailure
 from api.models.list import Item
 from api.models.user import User
 
-import certifi
-import os
-import ssl
+# Fix SSL certificate verification
+os.environ["SSL_CERT_FILE"] = certifi.where()
 
-# Set MongoDB client options with modified SSL context
+# Set MongoDB client options with correct parameters for Atlas connection
 client_options = {
     "serverSelectionTimeoutMS": 5000,  # 5 second timeout
     "connectTimeoutMS": 10000,  # 10 second timeout
     "retryWrites": True,
     "retryReads": True,
-    "w": "majority",  # Write concern
-    "tlsCAFile": certifi.where(),  # TLS/SSL certificate
-    "ssl": True,
-    "ssl_cert_reqs": ssl.CERT_NONE,  # Don't verify certificate (use in development only)
+    "tlsAllowInvalidCertificates": True,  # Bypass certificate verification for development
 }
 
 
@@ -53,15 +52,19 @@ async def init_database():
         db = client[db_name]
 
         # Initialize Beanie with the document models
+        print("Initializing Beanie with document models...")
         await init_beanie(
             database=db,
             document_models=[User, Item],
             allow_index_dropping=True,  # Recreate indexes if needed
         )
 
-        # List all collections for debugging
-        collections = await db.list_collection_names()
-        print(f"Available collections: {collections}")
+        try:
+            # List all collections for debugging
+            collections = await db.list_collection_names()
+            print(f"Available collections: {collections}")
+        except Exception as e:
+            print(f"Error listing collections: {str(e)}")
 
         print("Database initialization completed successfully")
         return client, db

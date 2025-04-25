@@ -1,11 +1,17 @@
 # debug_db.py - Place this file in your project root
 import asyncio
 import logging
+import os
+import ssl
+import certifi
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
 from api.models.my_config import get_settings
 from api.models.user import User
 from api.models.list import Item
+
+# Fix SSL certificate verification by setting environment variable
+os.environ["SSL_CERT_FILE"] = certifi.where()
 
 # Configure verbose logging
 logging.basicConfig(
@@ -28,14 +34,19 @@ async def test_db_connection():
         connection_string = my_config.connection_string
         logger.info(f"Connection string: {connection_string}")
         
-        # Create basic client without options first
-        logger.info("Creating MongoDB client")
-        client = AsyncIOMotorClient(connection_string)
+        # Create MongoDB client with TLS options
+        logger.info("Creating MongoDB client with SSL fix")
+        client = AsyncIOMotorClient(
+            connection_string,
+            serverSelectionTimeoutMS=5000, 
+            connectTimeoutMS=10000,
+            tlsAllowInvalidCertificates=True  # This is the key parameter to fix SSL issues
+        )
         
         # Test basic connection
         logger.info("Testing basic connection with ping")
         await client.admin.command("ping")
-        logger.info("Ping successful - basic connection works")
+        logger.info("Ping successful - connection works!")
         
         # Check database
         db_name = "list_app"
