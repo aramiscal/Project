@@ -9,10 +9,9 @@ from api.models.user import User
 
 import certifi
 import os
+import ssl
 
-os.environ["SSL_CERT_FILE"] = certifi.where()
-
-# Set MongoDB client options
+# Set MongoDB client options with modified SSL context
 client_options = {
     "serverSelectionTimeoutMS": 5000,  # 5 second timeout
     "connectTimeoutMS": 10000,  # 10 second timeout
@@ -20,6 +19,8 @@ client_options = {
     "retryReads": True,
     "w": "majority",  # Write concern
     "tlsCAFile": certifi.where(),  # TLS/SSL certificate
+    "ssl": True,
+    "ssl_cert_reqs": ssl.CERT_NONE,  # Don't verify certificate (use in development only)
 }
 
 
@@ -29,7 +30,7 @@ async def init_database():
         # Get configuration
         my_config = get_settings()
         connection_string = my_config.connection_string
-        print(f"Connection to MongoDB with connection string: {connection_string}")
+        print(f"Connecting to MongoDB with connection string: {connection_string}")
 
         # Create motor client with connection options
         client = AsyncIOMotorClient(connection_string, **client_options)
@@ -38,11 +39,13 @@ async def init_database():
         try:
             # Verify connection is working
             await asyncio.wait_for(client.admin.command("ping"), timeout=5.0)
+            print("Successfully connected to MongoDB!")
         except (
             asyncio.TimeoutError,
             ServerSelectionTimeoutError,
             ConnectionFailure,
         ) as e:
+            print(f"Failed to connect to MongoDB: {str(e)}")
             raise
 
         # Get or create database
@@ -56,7 +59,11 @@ async def init_database():
             allow_index_dropping=True,  # Recreate indexes if needed
         )
 
-        print("Database initiailization completed successfully")
+        # List all collections for debugging
+        collections = await db.list_collection_names()
+        print(f"Available collections: {collections}")
+
+        print("Database initialization completed successfully")
         return client, db
     except Exception as e:
         print(f"Database initialization failed: {str(e)}")
