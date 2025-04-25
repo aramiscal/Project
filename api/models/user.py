@@ -11,8 +11,8 @@ class User(Document):
     email: str
     password: str  # hashed & salted password in the database
     role: str = "user"
-    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
-    last_login: Optional[datetime] = None
+    created_at: datetime = None
+    last_login: datetime = None
 
     class Settings:
         name = "users"  # collection name in MongoDB
@@ -36,5 +36,5 @@ class UserResponse(BaseModel):
     username: str
     email: str
     role: str = "user"
-    created_at: Optional[datetime] = None
-    last_login: Optional[datetime] = None
+    created_at: datetime = None
+    last_login: datetime = None
