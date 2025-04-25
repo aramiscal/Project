@@ -1,0 +1,20 @@
+2025-04-25 14:10:55,240 - signup_debug - INFO - Starting signup debug process
+2025-04-25 14:10:55,241 - signup_debug - INFO - TRACE: Importing dependencies
+2025-04-25 14:10:55,396 - signup_debug - INFO - TRACE: Configuring password context
+2025-04-25 14:10:55,399 - signup_debug - INFO - TRACE: Creating test data
+2025-04-25 14:10:55,830 - signup_debug - INFO - TRACE: Initializing database connection
+2025-04-25 14:10:56,782 - signup_debug - INFO - TRACE: Database connection initialized
+2025-04-25 14:10:56,782 - signup_debug - INFO - TRACE: Creating User model instance
+2025-04-25 14:10:56,783 - signup_debug - INFO - TRACE: User model created: id=None revision_id=None username='signup_test_20250425191055' email='signup_test_20250425191055@example.com' password='$2b$12$QF84PZNL5EUFpcLh9Tkjo.kKxj8ai6K5L1V6b3HC0l4kt8qZFl0SO' role='user' created_at=datetime.datetime(2025, 4, 25, 19, 10, 56, 782762) last_login=None
+2025-04-25 14:10:56,783 - signup_debug - INFO - TRACE: Attempting to save user
+2025-04-25 14:10:56,818 - signup_debug - INFO - TRACE: Save result: id=ObjectId('680bde406fa303065eee9e38') revision_id=None username='signup_test_20250425191055' email='signup_test_20250425191055@example.com' password='$2b$12$QF84PZNL5EUFpcLh9Tkjo.kKxj8ai6K5L1V6b3HC0l4kt8qZFl0SO' role='user' created_at=datetime.datetime(2025, 4, 25, 19, 10, 56, 782000) last_login=None
+2025-04-25 14:10:56,818 - signup_debug - INFO - TRACE: Verifying user exists
+2025-04-25 14:10:56,848 - signup_debug - INFO - TRACE: User found with model query: id=ObjectId('680bde406fa303065eee9e38') revision_id=None username='signup_test_20250425191055' email='signup_test_20250425191055@example.com' password='$2b$12$QF84PZNL5EUFpcLh9Tkjo.kKxj8ai6K5L1V6b3HC0l4kt8qZFl0SO' role='user' created_at=datetime.datetime(2025, 4, 25, 19, 10, 56, 782000) last_login=None
+2025-04-25 14:10:56,882 - signup_debug - INFO - TRACE: User found with direct query: {'_id': ObjectId('680bde406fa303065eee9e38'), 'created_at': datetime.datetime(2025, 4, 25, 19, 10, 56, 782000), 'email': 'signup_test_20250425191055@example.com', 'last_login': None, 'password': '$2b$12$QF84PZNL5EUFpcLh9Tkjo.kKxj8ai6K5L1V6b3HC0l4kt8qZFl0SO', 'role': 'user', 'username': 'signup_test_20250425191055'}
+2025-04-25 14:10:56,883 - signup_debug - INFO - TRACE: Listing all users
+2025-04-25 14:10:56,925 - signup_debug - INFO - TRACE: Found 2 users in collection
+2025-04-25 14:10:56,926 - signup_debug - INFO - TRACE: User 1: test_debug_user (ID: 680bdb5b55756fb8343af790)
+2025-04-25 14:10:56,926 - signup_debug - INFO - TRACE: User 2: signup_test_20250425191055 (ID: 680bde406fa303065eee9e38)
+2025-04-25 14:10:56,926 - signup_debug - INFO - TRACE: Cleaning up
+2025-04-25 14:10:57,146 - signup_debug - INFO - TRACE: User deleted through model
+2025-04-25 14:10:57,147 - signup_debug - INFO - Debug process completed
