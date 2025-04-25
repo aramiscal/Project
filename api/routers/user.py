@@ -5,21 +5,11 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 from pydantic import ValidationError
-import logging
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler(), logging.FileHandler("user_routes.log")],
-)
-logger = logging.getLogger("user_routes")
 
 from api.auth.jwt_auth import Token, TokenData, create_access_token, decode_jwt_token
 from api.models.user import User, UserRequest, UserResponse
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 class HashPassword:
     def create_hash(self, password: str):
@@ -28,51 +18,35 @@ class HashPassword:
     def verify_hash(self, input_password: str, hashed_password: str):
         return pwd_context.verify(input_password, hashed_password)
 
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 hash_password = HashPassword()
-
 
 def get_user(token: Annotated[str, Depends(oauth2_scheme)]) -> TokenData:
     return decode_jwt_token(token)
 
-
 user_router = APIRouter()
-
 
 @user_router.post("/signup", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def sign_up(user: UserRequest, response: Response):
     try:
-        # Set up enhanced logging
-        logger.info(
-            f"Signup attempt for username: {user.username}, email: {user.email}"
-        )
-        logger.info(f"Current database: {User.get_motor_collection().database.name}")
-        logger.info(f"Current collection: {User.get_motor_collection().name}")
-
         # Get direct MongoDB access
         db = User.get_motor_collection().database
         users_collection = db["users"]  # Explicitly use string name
 
         # Check if username already exists using direct query
-        logger.info(f"Checking if username already exists: {user.username}")
         existing_user = await users_collection.find_one({"username": user.username})
         if existing_user:
-            logger.warning(f"Username already exists: {user.username}")
             response.status_code = status.HTTP_400_BAD_REQUEST
             return {"detail": "User already exists"}
 
         # Check if email already exists using direct query
-        logger.info(f"Checking if email already exists: {user.email}")
         existing_email = await users_collection.find_one({"email": user.email})
         if existing_email:
-            logger.warning(f"Email already in use: {user.email}")
             response.status_code = status.HTTP_400_BAD_REQUEST
             return {"detail": "Email already in use"}
 
         # Hash the password
         hashed_pwd = hash_password.create_hash(user.password)
-        logger.info("Password hashed successfully")
 
         # Create user document directly
         current_time = datetime.utcnow()
@@ -85,52 +59,31 @@ async def sign_up(user: UserRequest, response: Response):
             "last_login": None,
         }
 
-        logger.info(f"Created user document: {new_user_doc}")
-
-        # Insert directly using motor collection
-        logger.info(f"Attempting direct MongoDB insertion into {users_collection.name}")
-
         try:
             # Insert directly into MongoDB
             result = await users_collection.insert_one(new_user_doc)
 
-            # Log the result
             if result and hasattr(result, "inserted_id") and result.inserted_id:
-                logger.info(f"User inserted successfully with ID: {result.inserted_id}")
-
-                # Verify user exists by querying it back
-                verify = await users_collection.find_one({"_id": result.inserted_id})
-                if verify:
-                    logger.info(f"Verified user exists in database")
-                else:
-                    logger.warning(f"User not found in database after insertion")
-
                 return {"message": "User created successfully"}
             else:
-                logger.error("Insert operation returned no ID")
                 response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
                 return {
                     "detail": "Failed to create user: Insert operation returned no ID"
                 }
 
         except Exception as db_error:
-            logger.error(f"Database insertion error: {str(db_error)}", exc_info=True)
             response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
             return {"detail": f"Database error: {str(db_error)}"}
 
     except Exception as e:
-        logger.error(f"General error in sign_up: {str(e)}", exc_info=True)
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"detail": f"Failed to create user: {str(e)}"}
-
 
 @user_router.post("/sign-in", response_model=Token)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()], response: Response
 ) -> Token:
     try:
-        logger.info(f"Sign-in attempt for username: {form_data.username}")
-
         # Get direct access to database
         db = User.get_motor_collection().database
         users_collection = db["users"]
@@ -140,7 +93,6 @@ async def login_for_access_token(
         existing_user_doc = await users_collection.find_one({"username": username})
 
         if not existing_user_doc:
-            logger.warning(f"Sign-in failed: User not found: {username}")
             response.status_code = status.HTTP_401_UNAUTHORIZED
             return {
                 "access_token": "",
@@ -154,22 +106,18 @@ async def login_for_access_token(
         )
 
         if authenticated:
-            logger.info(f"User authenticated successfully: {username}")
             # Update last login time
             current_time = datetime.utcnow()
             await users_collection.update_one(
                 {"_id": existing_user_doc["_id"]},
                 {"$set": {"last_login": current_time}},
             )
-            logger.info(f"Last login time updated for: {username}")
 
             # Create access token
             role = existing_user_doc.get("role", "user")
             access_token = create_access_token({"username": username, "role": role})
-            logger.info(f"Access token created for: {username}")
             return Token(access_token=access_token)
         else:
-            logger.warning(f"Password verification failed for: {username}")
             response.status_code = status.HTTP_401_UNAUTHORIZED
             return {
                 "access_token": "",
@@ -178,7 +126,6 @@ async def login_for_access_token(
             }
 
     except Exception as e:
-        logger.error(f"Sign-in error: {str(e)}", exc_info=True)
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {
             "access_token": "",
@@ -186,24 +133,18 @@ async def login_for_access_token(
             "detail": f"Sign-in error: {str(e)}",
         }
 
-
 @user_router.get("/me", response_model=UserResponse)
 async def get_current_user(token_data: Annotated[TokenData, Depends(get_user)]):
     try:
-        logger.info(f"Getting profile for user: {token_data.username}")
-
         # Use direct MongoDB access
         db = User.get_motor_collection().database
         users_collection = db["users"]
         user_doc = await users_collection.find_one({"username": token_data.username})
 
         if not user_doc:
-            logger.warning(f"User not found: {token_data.username}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
-
-        logger.info(f"Successfully retrieved profile for: {token_data.username}")
 
         # Convert to UserResponse model
         return UserResponse(
@@ -215,7 +156,6 @@ async def get_current_user(token_data: Annotated[TokenData, Depends(get_user)]):
         )
 
     except Exception as e:
-        logger.error(f"Error retrieving user profile: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve user profile: {str(e)}",
