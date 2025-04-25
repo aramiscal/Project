@@ -64,6 +64,18 @@
         padding: 20px;
         margin: 0 auto;
       }
+      #username-display {
+        font-weight: bold;
+        color: #007bff; /* Bootstrap primary color */
+        font-size: 1.1em;
+      }
+
+      #signed-in-user {
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        padding: 0.5rem 1rem !important;
+        margin-bottom: 1rem;
+      }
     </style>
   </head>
   <body>
@@ -82,7 +94,7 @@
     >
       <span class="me-2">Welcome</span>
       <span id="username-display" class="fw-bold me-3"></span>
-      <button id="sign-out-btn" class="btn btn-outline-secondary btn-sm ms-2">
+      <button id="sign-out-btn" class="btn btn-outline-secondary btn-sm ms-2" onclick="handleSignOut()">
         Sign Out
       </button>
     </div>
@@ -203,7 +215,9 @@
                   autocomplete="new-password"
                 />
               </div>
-              <button type="button" class="btn btn-primary" onclick = "signUp()">Sign Up</button>
+              <button type="button" class="btn btn-primary" onclick="signUp()">
+                Sign Up
+              </button>
             </form>
           </div>
         </div>
@@ -278,6 +292,7 @@
         <span id="update-price"></span>
       </p>
     </div>
+    <script src="username-display.js"></script>
     <script src="hide-auth.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

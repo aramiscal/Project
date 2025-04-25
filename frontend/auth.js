@@ -32,18 +32,30 @@ const addAuthHeader = (xhr) => {
   }
 };
 
+// Function to ensure username is displayed
+function updateUsernameDisplay() {
+  const username = getUsername();
+  const usernameDisplay = document.getElementById("username-display");
+
+  if (username && usernameDisplay) {
+    usernameDisplay.textContent = username;
+
+    // Make sure the user info container is visible
+    const signedInUser = document.getElementById("signed-in-user");
+    if (signedInUser) {
+      signedInUser.style.display = "block";
+    }
+  }
+}
+
 // Update UI (Signin/Signup)
 const updateUI = () => {
   const isAuthenticated = isLoggedIn();
-  console.log("updateUI called, isAuthenticated:", isAuthenticated);
 
-  // Always hide auth container when user is logged in
+  // Get auth container and check if it exists
   const authContainer = document.getElementById("auth-container");
   if (authContainer) {
     authContainer.style.display = isAuthenticated ? "none" : "block";
-    console.log("Auth container display set to:", authContainer.style.display);
-  } else {
-    console.error("Auth container element not found!");
   }
 
   // Show user info when logged in
@@ -53,10 +65,7 @@ const updateUI = () => {
   }
 
   if (isAuthenticated) {
-    const usernameDisplay = document.getElementById("username-display");
-    if (usernameDisplay) {
-      usernameDisplay.textContent = getUsername();
-    }
+    updateUsernameDisplay();
   }
 
   // Show content that requires authentication
@@ -152,26 +161,21 @@ const signIn = (username, password) => {
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
-          console.log("Sign-in successful");
           const response = JSON.parse(xhr.responseText);
           storeToken(response.access_token);
           storeUserInfo(username); // Store username for display
 
-          console.log("Token stored:", response.access_token);
-          console.log("Username stored:", username);
-
-          // Force hide auth container immediately after successful login
+          // Hide auth container immediately after successful login
           const authContainer = document.getElementById("auth-container");
           if (authContainer) {
-            console.log("Hiding auth container after successful login");
             authContainer.style.display = "none";
-          } else {
-            console.error("Auth container not found after successful login");
           }
+
+          // Update username display
+          updateUsernameDisplay();
 
           resolve(response);
         } else {
-          console.log("Sign-in failed with status:", xhr.status);
           let errorMessage = "Network error";
           try {
             if (xhr.responseText) {
@@ -196,11 +200,56 @@ const signIn = (username, password) => {
   });
 };
 
+// Enhanced Sign Out functionality
 const signOut = () => {
+  console.log("Sign out initiated");
+
+  // Clear authentication data
   removeToken();
-  updateUI();
-  // Reload page to clear user-specific data
-  window.location.reload();
+
+  // Show the authentication UI
+  const authContainer = document.getElementById("auth-container");
+  if (authContainer) {
+    authContainer.style.display = "block";
+  }
+
+  // Hide the signed-in user display
+  const signedInUser = document.getElementById("signed-in-user");
+  if (signedInUser) {
+    signedInUser.style.display = "none";
+  }
+
+  // Clear the shopping list in the UI
+  const listRows = document.getElementById("list-rows");
+  if (listRows) {
+    listRows.innerHTML = "";
+  }
+
+  // Reset the total price
+  const totalPrice = document.getElementById("update-price");
+  if (totalPrice) {
+    totalPrice.textContent = "0";
+  }
+
+  // Hide all elements that require authentication
+  const authRequiredElements = document.querySelectorAll(".auth-required");
+  authRequiredElements.forEach((element) => {
+    element.style.display = "none";
+  });
+
+  // Reset input fields
+  const nameInput = document.getElementById("new-name");
+  const quantityInput = document.getElementById("new-quantity");
+  const typeInput = document.getElementById("new-type");
+  const priceInput = document.getElementById("new-price");
+
+  if (nameInput) nameInput.value = "";
+  if (quantityInput) quantityInput.value = "";
+  if (typeInput) typeInput.value = "";
+  if (priceInput) priceInput.value = "";
+
+  // Show a success message
+  showAlert("You have been signed out successfully.", "info");
 };
 
 // Initialize auth state
@@ -208,6 +257,7 @@ const initAuth = () => {
   console.log("Initializing auth state");
   // First check if user is already logged in and update UI accordingly
   updateUI();
+  updateUsernameDisplay(); // Ensure username is displayed on page load
 
   document
     .getElementById("sign-up-form")
@@ -301,14 +351,23 @@ const initAuth = () => {
       }
     });
 
-  // Sign Out button handler
+  // Connect sign-out button with proper error handling
   const signOutBtn = document.getElementById("sign-out-btn");
   if (signOutBtn) {
     signOutBtn.addEventListener("click", () => {
       console.log("Sign out button clicked");
-      signOut();
-      showAlert("You have been signed out.", "info");
+      try {
+        signOut();
+      } catch (error) {
+        console.error("Error during sign out:", error);
+        showAlert(
+          "There was a problem signing out. Please try again.",
+          "danger"
+        );
+      }
     });
+  } else {
+    console.warn("Sign out button not found in the DOM");
   }
 };
 
@@ -330,6 +389,41 @@ const showAlert = (message, type = "info") => {
 
   alertContainer.appendChild(alert);
 };
+
+// Direct sign-out function - simplified for reliability
+function handleSignOut() {
+  console.log("Sign out function called");
+
+  // Clear auth data from localStorage
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("username");
+
+  // Reset UI state
+  document.getElementById("auth-container").style.display = "block";
+  document.getElementById("signed-in-user").style.display = "none";
+
+  // Clear the shopping list
+  document.getElementById("list-rows").innerHTML = "";
+
+  // Reset total price
+  document.getElementById("update-price").innerHTML = "0";
+
+  // Hide authenticated elements
+  document.querySelectorAll(".auth-required").forEach((el) => {
+    el.style.display = "none";
+  });
+
+  // Show alert
+  const alertContainer = document.getElementById("alert-container");
+  const alert = document.createElement("div");
+  alert.className = "alert alert-info alert-dismissible fade show";
+  alert.role = "alert";
+  alert.innerHTML = `
+    You have been signed out successfully.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  `;
+  alertContainer.appendChild(alert);
+}
 
 window.auth = {
   isLoggedIn,

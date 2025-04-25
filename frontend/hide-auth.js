@@ -1,5 +1,3 @@
-// Save this as hide-auth.js and include it in your HTML
-
 // This function will hide the auth UI
 function hideAuthContainer() {
   // Try multiple selectors to find the auth container
