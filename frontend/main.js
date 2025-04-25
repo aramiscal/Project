@@ -1,5 +1,26 @@
 const api = "/list";
 
+// Function to hide auth UI when sign-in is successful
+function hideAuthUI() {
+  // Get the auth container directly from the DOM
+  const authContainer = document.querySelector(".auth-container");
+  if (authContainer) {
+    authContainer.style.display = "none";
+  }
+
+  // Show user content
+  const authRequiredElements = document.querySelectorAll(".auth-required");
+  authRequiredElements.forEach((el) => {
+    el.style.display = "block";
+  });
+
+  // Show signed-in user info
+  const signedInUser = document.getElementById("signed-in-user");
+  if (signedInUser) {
+    signedInUser.style.display = "block";
+  }
+}
+
 const addPrice = (list) => {
   let total_price = 0;
   const p = document.getElementById("update-price");
