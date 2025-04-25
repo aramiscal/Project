@@ -23,6 +23,9 @@ client_options = {
 }
 
 
+# Replace the init_database function in api/database/db_context.py with this improved version
+
+
 async def init_database():
     """Initialize database connection and set up collections"""
     try:
@@ -47,9 +50,22 @@ async def init_database():
             print(f"Failed to connect to MongoDB: {str(e)}")
             raise
 
-        # Get or create database
-        db_name = "list_app"  # Explicitly set database name
+        # Extract database name from connection string or use default
+        # Connection string format: mongodb+srv://username:password@cluster0.rwhzu.mongodb.net/list_app
+        parsed_db_name = connection_string.split("/")[-1]
+        db_name = parsed_db_name if parsed_db_name else "list_app"
+        print(f"Using database: {db_name}")
+
         db = client[db_name]
+
+        # Ensure collections exist before initializing Beanie
+        if "users" not in await db.list_collection_names():
+            print("Creating users collection...")
+            await db.create_collection("users")
+
+        if "products" not in await db.list_collection_names():
+            print("Creating products collection...")
+            await db.create_collection("products")
 
         # Initialize Beanie with the document models
         print("Initializing Beanie with document models...")
@@ -63,8 +79,15 @@ async def init_database():
             # List all collections for debugging
             collections = await db.list_collection_names()
             print(f"Available collections: {collections}")
+
+            # Print document counts to verify collections
+            users_count = await db.users.count_documents({})
+            items_count = await db.products.count_documents({})
+            print(f"Collection users has {users_count} documents")
+            print(f"Collection products has {items_count} documents")
+
         except Exception as e:
-            print(f"Error listing collections: {str(e)}")
+            print(f"Error checking collections: {str(e)}")
 
         print("Database initialization completed successfully")
         return client, db

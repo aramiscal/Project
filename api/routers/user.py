@@ -43,15 +43,19 @@ user_router = APIRouter()
 @user_router.post("/signup", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def sign_up(user: UserRequest, response: Response):
     try:
+        # Set up enhanced logging
         logger.info(
             f"Signup attempt for username: {user.username}, email: {user.email}"
         )
+        logger.info(f"Current database: {User.get_motor_collection().database.name}")
+        logger.info(f"Current collection: {User.get_motor_collection().name}")
 
-        # Get direct access to database
+        # Get direct MongoDB access
         db = User.get_motor_collection().database
-        users_collection = db["users"]
+        users_collection = db["users"]  # Explicitly use string name
 
         # Check if username already exists using direct query
+        logger.info(f"Checking if username already exists: {user.username}")
         existing_user = await users_collection.find_one({"username": user.username})
         if existing_user:
             logger.warning(f"Username already exists: {user.username}")
@@ -59,6 +63,7 @@ async def sign_up(user: UserRequest, response: Response):
             return {"detail": "User already exists"}
 
         # Check if email already exists using direct query
+        logger.info(f"Checking if email already exists: {user.email}")
         existing_email = await users_collection.find_one({"email": user.email})
         if existing_email:
             logger.warning(f"Email already in use: {user.email}")
@@ -80,28 +85,25 @@ async def sign_up(user: UserRequest, response: Response):
             "last_login": None,
         }
 
-        logger.info(f"User document created: {new_user_doc}")
+        logger.info(f"Created user document: {new_user_doc}")
+
+        # Insert directly using motor collection
+        logger.info(f"Attempting direct MongoDB insertion into {users_collection.name}")
 
         try:
             # Insert directly into MongoDB
-            logger.info(f"Attempting to insert user directly: {user.username}")
             result = await users_collection.insert_one(new_user_doc)
 
-            if result.inserted_id:
+            # Log the result
+            if result and hasattr(result, "inserted_id") and result.inserted_id:
                 logger.info(f"User inserted successfully with ID: {result.inserted_id}")
 
-                # Verify user exists
-                verify_user = await users_collection.find_one(
-                    {"_id": result.inserted_id}
-                )
-                if verify_user:
-                    logger.info(
-                        f"Verification successful - user found in database: {verify_user['_id']}"
-                    )
+                # Verify user exists by querying it back
+                verify = await users_collection.find_one({"_id": result.inserted_id})
+                if verify:
+                    logger.info(f"Verified user exists in database")
                 else:
-                    logger.warning(
-                        f"Verification failed - user not found in database after insert"
-                    )
+                    logger.warning(f"User not found in database after insertion")
 
                 return {"message": "User created successfully"}
             else:
@@ -111,12 +113,10 @@ async def sign_up(user: UserRequest, response: Response):
                     "detail": "Failed to create user: Insert operation returned no ID"
                 }
 
-        except Exception as e:
-            logger.error(
-                f"Database error during user creation: {str(e)}", exc_info=True
-            )
+        except Exception as db_error:
+            logger.error(f"Database insertion error: {str(db_error)}", exc_info=True)
             response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-            return {"detail": f"Database error: {str(e)}"}
+            return {"detail": f"Database error: {str(db_error)}"}
 
     except Exception as e:
         logger.error(f"General error in sign_up: {str(e)}", exc_info=True)

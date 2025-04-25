@@ -1,0 +1,38 @@
+2025-04-25 14:51:23,762 - user_routes - INFO - Signup attempt for username: test_user_1745610683752, email: test_user_1745610683752@example.com
+2025-04-25 14:51:23,763 - user_routes - INFO - Current database: list_app
+2025-04-25 14:51:23,763 - user_routes - INFO - Current collection: users
+2025-04-25 14:51:23,763 - user_routes - INFO - Checking if username already exists: test_user_1745610683752
+2025-04-25 14:51:23,855 - user_routes - INFO - Checking if email already exists: test_user_1745610683752@example.com
+2025-04-25 14:51:24,330 - user_routes - INFO - Password hashed successfully
+2025-04-25 14:51:24,331 - user_routes - INFO - Created user document: {'username': 'test_user_1745610683752', 'email': 'test_user_1745610683752@example.com', 'password': '$2b$12$edQ6sIxOko/kY432YAAXDeT1iRkR4v5xuBIyPFvRaXvZZcYdg6YDq', 'role': 'user', 'created_at': datetime.datetime(2025, 4, 25, 19, 51, 24, 331035), 'last_login': None}
+2025-04-25 14:51:24,331 - user_routes - INFO - Attempting direct MongoDB insertion into users
+2025-04-25 14:51:24,396 - user_routes - INFO - User inserted successfully with ID: 680be7bc0d7545e60059a217
+2025-04-25 14:51:24,425 - user_routes - INFO - Verified user exists in database
+2025-04-25 14:51:24,441 - user_routes - INFO - Sign-in attempt for username: test_user_1745610683752
+2025-04-25 14:51:24,879 - user_routes - INFO - User authenticated successfully: test_user_1745610683752
+2025-04-25 14:51:24,914 - user_routes - INFO - Last login time updated for: test_user_1745610683752
+2025-04-25 14:51:24,916 - user_routes - INFO - Access token created for: test_user_1745610683752
+2025-04-25 14:52:32,209 - user_routes - INFO - Signup attempt for username: test_user_1745610752202, email: test_user_1745610752202@example.com
+2025-04-25 14:52:32,210 - user_routes - INFO - Current database: list_app
+2025-04-25 14:52:32,210 - user_routes - INFO - Current collection: users
+2025-04-25 14:52:32,210 - user_routes - INFO - Checking if username already exists: test_user_1745610752202
+2025-04-25 14:52:32,266 - user_routes - INFO - Checking if email already exists: test_user_1745610752202@example.com
+2025-04-25 14:52:32,693 - user_routes - INFO - Password hashed successfully
+2025-04-25 14:52:32,693 - user_routes - INFO - Created user document: {'username': 'test_user_1745610752202', 'email': 'test_user_1745610752202@example.com', 'password': '$2b$12$lP34Dpf8H.q5m4tyV83ZMedvnkXLWBrkiFmOCDZ4H2L7PWjvjf/DO', 'role': 'user', 'created_at': datetime.datetime(2025, 4, 25, 19, 52, 32, 693728), 'last_login': None}
+2025-04-25 14:52:32,693 - user_routes - INFO - Attempting direct MongoDB insertion into users
+2025-04-25 14:52:32,747 - user_routes - INFO - User inserted successfully with ID: 680be8000d7545e60059a218
+2025-04-25 14:52:32,777 - user_routes - INFO - Verified user exists in database
+2025-04-25 14:52:32,787 - user_routes - INFO - Sign-in attempt for username: test_user_1745610752202
+2025-04-25 14:52:33,212 - user_routes - INFO - User authenticated successfully: test_user_1745610752202
+2025-04-25 14:52:33,246 - user_routes - INFO - Last login time updated for: test_user_1745610752202
+2025-04-25 14:52:33,247 - user_routes - INFO - Access token created for: test_user_1745610752202
+2025-04-25 15:13:35,120 - user_routes - INFO - Signup attempt for username: ajilwefk, email: laikefnj@gmail.com
+2025-04-25 15:13:35,120 - user_routes - INFO - Current database: list_app
+2025-04-25 15:13:35,120 - user_routes - INFO - Current collection: users
+2025-04-25 15:13:35,121 - user_routes - INFO - Checking if username already exists: ajilwefk
+2025-04-25 15:13:35,157 - user_routes - INFO - Checking if email already exists: laikefnj@gmail.com
+2025-04-25 15:13:35,585 - user_routes - INFO - Password hashed successfully
+2025-04-25 15:13:35,586 - user_routes - INFO - Created user document: {'username': 'ajilwefk', 'email': 'laikefnj@gmail.com', 'password': '$2b$12$.8a7XKqr6oBnpyZB49meyuGd6l2Kf4nPyM2iGcaYGfvP7Morx3K.y', 'role': 'user', 'created_at': datetime.datetime(2025, 4, 25, 20, 13, 35, 586387), 'last_login': None}
+2025-04-25 15:13:35,586 - user_routes - INFO - Attempting direct MongoDB insertion into users
+2025-04-25 15:13:35,629 - user_routes - INFO - User inserted successfully with ID: 680becef0d7545e60059a219
+2025-04-25 15:13:35,659 - user_routes - INFO - Verified user exists in database

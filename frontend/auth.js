@@ -64,52 +64,22 @@ const validateEmail = (email) => {
 };
 
 // Sign Up
-const signUp = (username, email, password) => {
-  return new Promise((resolve, reject) => {
-    // Validate Inputs
-    if (!validatePassword(password)) {
-      reject({ detail: "Password must be at least 8 characters long" });
-      return;
+const signUp = () => {
+  const username = document.getElementById("signup-username").value;
+  const email = document.getElementById("signup-email").value;
+  const password = document.getElementById("signup-password").value;
+
+  const xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState == 4 && xhr.status == 201) {
+      getList();
+      initAuth();
     }
+  };
 
-    if (!validateEmail(email)) {
-      reject({ detail: "Please enter a valid email address" });
-      return;
-    }
-
-    const xhr = new XMLHttpRequest();
-    // In frontend/auth.js in the signUp function:
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState === 4) {
-        console.log(`Sign-up response status: ${xhr.status}`);
-        console.log(`Sign-up response text: ${xhr.responseText}`);
-
-        if (xhr.status === 201) {
-          // 201 Created status - success
-          resolve(JSON.parse(xhr.responseText));
-        } else {
-          // Handle error responses
-          let errorMessage = "Network error";
-          try {
-            if (xhr.responseText) {
-              const errorResponse = JSON.parse(xhr.responseText);
-              console.error("Error response:", errorResponse);
-              errorMessage = errorResponse.detail || "Sign-up failed";
-            }
-          } catch (e) {
-            console.error("Error parsing response:", e);
-            // If parsing fails, use default error message
-            errorMessage = "Something went wrong during sign-up";
-          }
-          reject({ detail: errorMessage });
-        }
-      }
-    };
-
-    xhr.open("POST", "/users/signup", true);
-    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify({ username, email, password }));
-  });
+  xhr.open("POST", "/users/signup", true);
+  xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+  xhr.send(JSON.stringify({ username, email, password }));
 };
 
 // Sign In
