@@ -25,10 +25,14 @@ const getToken = () => {
   return localStorage.getItem("access_token");
 };
 
+// Fixed add auth header function - properly format the Authorization header
 const addAuthHeader = (xhr) => {
   const token = getToken();
   if (token) {
     xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    console.log("Added auth header: Bearer " + token.substring(0, 10) + "...");
+  } else {
+    console.warn("No token available for auth header");
   }
 };
 
@@ -51,17 +55,20 @@ function updateUsernameDisplay() {
 // Update UI (Signin/Signup)
 const updateUI = () => {
   const isAuthenticated = isLoggedIn();
+  console.log("Updating UI based on authentication status:", isAuthenticated);
 
   // Get auth container and check if it exists
   const authContainer = document.getElementById("auth-container");
   if (authContainer) {
     authContainer.style.display = isAuthenticated ? "none" : "block";
+    console.log("Auth container display set to:", authContainer.style.display);
   }
 
   // Show user info when logged in
   const signedInUser = document.getElementById("signed-in-user");
   if (signedInUser) {
     signedInUser.style.display = isAuthenticated ? "block" : "none";
+    console.log("Signed in user display set to:", signedInUser.style.display);
   }
 
   if (isAuthenticated) {
@@ -91,6 +98,27 @@ const signUp = () => {
   const username = document.getElementById("signup-username").value;
   const email = document.getElementById("signup-email").value;
   const password = document.getElementById("signup-password").value;
+  const confirmPassword = document.getElementById(
+    "signup-confirm-password"
+  ).value;
+
+  // Check if passwords match
+  if (password !== confirmPassword) {
+    showAlert("Passwords do not match", "danger");
+    return;
+  }
+
+  // Check if password is valid
+  if (!validatePassword(password)) {
+    showAlert("Password must be at least 8 characters long", "danger");
+    return;
+  }
+
+  // Check if email is valid
+  if (!validateEmail(email)) {
+    showAlert("Please enter a valid email address", "danger");
+    return;
+  }
 
   // Hide the auth container when Sign Up is clicked
   const authContainer = document.getElementById("auth-container");
@@ -102,7 +130,6 @@ const signUp = () => {
   xhr.onreadystatechange = () => {
     if (xhr.readyState == 4) {
       if (xhr.status == 201) {
-        getList();
         // Show the sign-in tab with a success message
         showAlert("Sign-up successful! Please sign in.", "success");
 
@@ -146,6 +173,7 @@ const signUp = () => {
   xhr.open("POST", "/users/signup", true);
   xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
   xhr.send(JSON.stringify({ username, email, password }));
+  console.log("Sign up request sent for user:", username);
 };
 
 // Sign In
@@ -160,21 +188,41 @@ const signIn = (username, password) => {
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
+        console.log("Sign-in response received, status:", xhr.status);
         if (xhr.status === 200) {
-          const response = JSON.parse(xhr.responseText);
-          storeToken(response.access_token);
-          storeUserInfo(username); // Store username for display
+          try {
+            const response = JSON.parse(xhr.responseText);
+            console.log(
+              "Token received:",
+              response.access_token
+                ? "Yes (length: " + response.access_token.length + ")"
+                : "No"
+            );
 
-          // Hide auth container immediately after successful login
-          const authContainer = document.getElementById("auth-container");
-          if (authContainer) {
-            authContainer.style.display = "none";
+            if (!response.access_token) {
+              reject({
+                detail: "Invalid response from server - no token received",
+              });
+              return;
+            }
+
+            storeToken(response.access_token);
+            storeUserInfo(username); // Store username for display
+
+            // Hide auth container immediately after successful login
+            const authContainer = document.getElementById("auth-container");
+            if (authContainer) {
+              authContainer.style.display = "none";
+            }
+
+            // Update username display
+            updateUsernameDisplay();
+
+            resolve(response);
+          } catch (e) {
+            console.error("Error parsing response:", e);
+            reject({ detail: "Error processing server response" });
           }
-
-          // Update username display
-          updateUsernameDisplay();
-
-          resolve(response);
         } else {
           let errorMessage = "Network error";
           try {
@@ -197,6 +245,7 @@ const signIn = (username, password) => {
 
     xhr.open("POST", "/users/sign-in", true);
     xhr.send(formData);
+    console.log("Sign-in request sent for user:", username);
   });
 };
 
@@ -211,12 +260,14 @@ const signOut = () => {
   const authContainer = document.getElementById("auth-container");
   if (authContainer) {
     authContainer.style.display = "block";
+    console.log("Auth container display set to: block");
   }
 
   // Hide the signed-in user display
   const signedInUser = document.getElementById("signed-in-user");
   if (signedInUser) {
     signedInUser.style.display = "none";
+    console.log("Signed in user display set to: none");
   }
 
   // Clear the shopping list in the UI
@@ -283,23 +334,12 @@ const initAuth = () => {
       submitBtn.disabled = true;
 
       try {
-        // Hide the auth container when Sign Up button is clicked
-        const authContainer = document.getElementById("auth-container");
-        if (authContainer) {
-          authContainer.style.display = "none";
-        }
-
-        signUp(username, email, password);
+        signUp();
       } catch (error) {
         showAlert(
           error.detail || "Sign-up failed. Please try again.",
           "danger"
         );
-        // Show the auth container again if there's an error
-        const authContainer = document.getElementById("auth-container");
-        if (authContainer) {
-          authContainer.style.display = "block";
-        }
       } finally {
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
@@ -338,7 +378,11 @@ const initAuth = () => {
         updateUI();
 
         // Fetch user-specific data
-        getList();
+        if (typeof getList === "function") {
+          getList();
+        } else {
+          console.warn("getList function not found");
+        }
       } catch (error) {
         console.error("Sign-in error:", error);
         showAlert(
@@ -414,17 +458,10 @@ function handleSignOut() {
   });
 
   // Show alert
-  const alertContainer = document.getElementById("alert-container");
-  const alert = document.createElement("div");
-  alert.className = "alert alert-info alert-dismissible fade show";
-  alert.role = "alert";
-  alert.innerHTML = `
-    You have been signed out successfully.
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  `;
-  alertContainer.appendChild(alert);
+  showAlert("You have been signed out successfully.", "info");
 }
 
+// Expose functions to window object
 window.auth = {
   isLoggedIn,
   getToken,
@@ -432,4 +469,6 @@ window.auth = {
   signOut,
   showAlert,
   getUsername,
+  updateUI,
+  handleSignOut,
 };
