@@ -23,7 +23,7 @@ function hideAuthUI() {
   // Show user content
   const authRequiredElements = document.querySelectorAll(".auth-required");
   authRequiredElements.forEach((el) => {
-    el.style.display = "block";
+    el.style.display = el.tagName === "TABLE" ? "table" : "block";
   });
 
   // Show signed-in user info
@@ -112,6 +112,21 @@ document.addEventListener("DOMContentLoaded", function () {
   } else {
     console.warn("Add item button not found");
   }
+
+  // Check if the user is logged in
+  if (checkAuthReady() && window.auth.isLoggedIn()) {
+    console.log("User is logged in, initializing UI");
+    hideAuthUI();
+    getList();
+  } else {
+    console.log("User is not logged in, showing auth UI");
+    showAuthUI();
+  }
+
+  // Initialize auth if needed
+  if (typeof window.initAuth === "function") {
+    window.initAuth();
+  }
 });
 
 const postItem = () => {
@@ -140,7 +155,7 @@ const postItem = () => {
   }
 
   const quantityToInt = parseInt(quantity, 10);
-  const priceToInt = parseFloat(price);
+  const priceToFloat = parseFloat(price);
 
   // Validate numeric values
   if (isNaN(quantityToInt) || quantityToInt <= 0) {
@@ -148,7 +163,7 @@ const postItem = () => {
     return;
   }
 
-  if (isNaN(priceToInt) || priceToInt <= 0) {
+  if (isNaN(priceToFloat) || priceToFloat <= 0) {
     window.auth.showAlert("Price must be a positive number", "danger");
     return;
   }
@@ -159,6 +174,7 @@ const postItem = () => {
       if (xhr.status == 201) {
         getList();
         resetInput();
+        window.auth.showAlert("Item added successfully!", "success");
       } else if (xhr.status == 401) {
         console.error("Unauthorized when adding item");
         window.auth.showAlert(
@@ -185,7 +201,7 @@ const postItem = () => {
       name: name,
       type: type,
       quantity: quantityToInt,
-      price: priceToInt,
+      price: priceToFloat,
     })
   );
 };
@@ -198,6 +214,7 @@ const deleteItem = (name) => {
     if (xhr.readyState == 4) {
       if (xhr.status == 200) {
         getList();
+        window.auth.showAlert("Item deleted successfully!", "success");
       } else if (xhr.status == 401) {
         console.error("Unauthorized when deleting item");
         window.auth.showAlert(
@@ -241,6 +258,7 @@ const displayList = (list) => {
   if (list.length === 0) {
     // If the list is empty, show a message
     tbody.innerHTML = `<tr><td colspan="5" class="text-center">No items in your shopping list</td></tr>`;
+    updateTotalPrice([]);
     return;
   }
 
@@ -254,7 +272,7 @@ const displayList = (list) => {
             <td>${x.name || ""}</td>
             <td>${x.type || ""}</td>
             <td>${x.quantity || 0}</td>
-            <td>$${
+            <td>${
               typeof x.price === "number" ? x.price.toFixed(2) : "0.00"
             }</td>
             <td><button onClick="deleteItem('${
@@ -262,145 +280,9 @@ const displayList = (list) => {
             }')" type="button" class="btn btn-danger">Delete</button></td>
         </tr>`;
   });
+
   tbody.innerHTML = rows.join("");
+
+  // Update total price
+  addPrice(list);
 };
-
-const getList = () => {
-  if (!checkAuthReady()) return;
-
-  if (!window.auth.isLoggedIn()) {
-    // Clear the list if not logged in
-    const listRows = document.getElementById("list-rows");
-    if (listRows) listRows.innerHTML = "";
-
-    const updatePrice = document.getElementById("update-price");
-    if (updatePrice) updatePrice.innerHTML = "0";
-
-    return;
-  }
-
-  const xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = () => {
-    if (xhr.readyState == 4) {
-      if (xhr.status == 200) {
-        try {
-          const data = JSON.parse(xhr.responseText);
-          displayList(data);
-          addPrice(data);
-        } catch (error) {
-          console.error("Error parsing list data", error);
-          window.auth.showAlert("Error loading shopping list", "danger");
-        }
-      } else if (xhr.status == 401) {
-        console.error("Unauthorized when getting list");
-        window.auth.showAlert(
-          "Your session has expired. Please sign in again.",
-          "warning"
-        );
-        showAuthUI();
-      } else {
-        console.error("Error getting list", xhr.status, xhr.responseText);
-        window.auth.showAlert(
-          "Error loading shopping list: " +
-            (xhr.status === 0 ? "Network error" : xhr.status),
-          "danger"
-        );
-      }
-    }
-  };
-
-  xhr.open("GET", api, true);
-  window.auth.addAuthHeader(xhr);
-  xhr.send();
-};
-
-// Custom function for handling sign out
-function handleSignOut() {
-  console.log("Sign out function called in main.js");
-
-  if (checkAuthReady()) {
-    try {
-      // Use the auth module's sign out function
-      window.auth.signOut();
-    } catch (error) {
-      console.error("Error in auth module sign out", error);
-
-      // Fallback implementation
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("username");
-
-      showAuthUI();
-
-      // Clear the shopping list
-      const listRows = document.getElementById("list-rows");
-      if (listRows) listRows.innerHTML = "";
-
-      // Reset total price
-      const updatePrice = document.getElementById("update-price");
-      if (updatePrice) updatePrice.innerHTML = "0";
-
-      // Show alert
-      if (window.auth && window.auth.showAlert) {
-        window.auth.showAlert("You have been signed out successfully.", "info");
-      }
-    }
-  } else {
-    // If auth module not ready, use direct implementation
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("username");
-
-    showAuthUI();
-
-    // Clear the shopping list
-    const listRows = document.getElementById("list-rows");
-    if (listRows) listRows.innerHTML = "";
-
-    // Reset total price
-    const updatePrice = document.getElementById("update-price");
-    if (updatePrice) updatePrice.innerHTML = "0";
-
-    console.log("Direct sign out implementation complete");
-  }
-}
-
-// Attach the handleSignOut function to the window
-window.handleSignOut = handleSignOut;
-
-// Initialize the application
-function init() {
-  console.log("Initializing main application");
-
-  // Check if auth module is ready
-  if (typeof window.initAuth === "function") {
-    initAuth();
-  } else {
-    console.warn("Auth module not initialized properly");
-  }
-
-  // Check if the user is logged in
-  if (checkAuthReady() && window.auth.isLoggedIn()) {
-    console.log("User is logged in, initializing UI");
-    hideAuthUI();
-    getList();
-  } else {
-    console.log("User is not logged in, showing auth UI");
-    showAuthUI();
-  }
-
-  // Add event listener to the signout button
-  const signOutBtn = document.getElementById("sign-out-btn");
-  if (signOutBtn) {
-    signOutBtn.addEventListener("click", handleSignOut);
-  } else {
-    console.warn("Sign out button not found");
-  }
-}
-
-// Initialize on page load
-document.addEventListener("DOMContentLoaded", init);
-
-// Make functions available globally
-window.getList = getList;
-window.deleteItem = deleteItem;
-window.hideAuthUI = hideAuthUI;
-window.showAuthUI = showAuthUI;

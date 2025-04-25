@@ -10,7 +10,6 @@
       integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
       crossorigin="anonymous"
     />
-    <link rel="icon" href="favicon.png" type="image/x-icon" />
     <style>
       body {
         background-color: powderblue;
@@ -18,11 +17,12 @@
       h1 {
         text-align: center;
         font-size: xx-large;
-        font-style: bold;
+        font-weight: bold;
       }
       h5 {
-        margin-left: 500px;
-        margin-right: 500px;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 500px;
         font-size: medium;
       }
       table,
@@ -66,272 +66,264 @@
       }
       #username-display {
         font-weight: bold;
-        color: #007bff; /* Bootstrap primary color */
+        color: #007bff;
         font-size: 1.1em;
       }
-
       #signed-in-user {
         background-color: #f8f9fa;
         border-radius: 4px;
         padding: 0.5rem 1rem !important;
         margin-bottom: 1rem;
       }
+      @media (max-width: 768px) {
+        h5 {
+          margin-left: 20px;
+          margin-right: 20px;
+        }
+        .box {
+          width: 90%;
+        }
+        table {
+          width: 90%;
+        }
+      }
     </style>
   </head>
   <body>
-    <h1>Shopping List</h1>
+    <div class="container">
+      <h1 class="mt-4 mb-4">Shopping List</h1>
 
-    <hr />
+      <hr />
 
-    <!-- Alert -->
-    <div id="alert-container" class="container mt-3"></div>
+      <!-- Alert Container -->
+      <div id="alert-container" class="container mt-3"></div>
 
-    <!-- User Info -->
-    <div
-      id="signed-in-user"
-      class="user-info d-flex justify-content-end align-items-center p-2"
-      style="display: none"
-    >
-      <span class="me-2">Welcome</span>
-      <span id="username-display" class="fw-bold me-3"></span>
-      <button id="sign-out-btn" class="btn btn-outline-secondary btn-sm ms-2">
-        Sign Out
-      </button>
-    </div>
-    <h5>
+      <!-- User Info -->
+      <div
+        id="signed-in-user"
+        class="user-info d-flex justify-content-end align-items-center p-2"
+        style="display: none"
+      >
+        <span class="me-2">Welcome</span>
+        <span id="username-display" class="fw-bold me-3"></span>
+        <button id="sign-out-btn" class="btn btn-outline-secondary btn-sm ms-2">
+          Sign Out
+        </button>
+      </div>
+
       <!-- Authentication Container -->
       <div id="auth-container" class="auth-container">
-        <ul class="nav nav-tabs" id="auth-tab" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button
-              class="nav-link active"
-              id="signin-tab"
-              data-bs-toggle="tab"
-              data-bs-target="#signin"
-              type="button"
-              role="tab"
-              aria-controls="signin"
-              aria-selected="true"
+        <h5>
+          <ul class="nav nav-tabs" id="auth-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="signin-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#signin"
+                type="button"
+                role="tab"
+                aria-controls="signin"
+                aria-selected="true"
+              >
+                Sign In
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="signup-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#signup"
+                type="button"
+                role="tab"
+                aria-controls="signup"
+                aria-selected="false"
+              >
+                Sign Up
+              </button>
+            </li>
+          </ul>
+          <div class="tab-content pt-3" id="auth-tab-content">
+            <!-- Sign In Form -->
+            <div
+              class="tab-pane fade show active"
+              id="signin"
+              role="tabpanel"
+              aria-labelledby="signin-tab"
             >
-              Sign In
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button
-              class="nav-link"
-              id="signup-tab"
-              data-bs-toggle="tab"
-              data-bs-target="#signup"
-              type="button"
-              role="tab"
-              aria-controls="signup"
-              aria-selected="false"
-            >
-              Sign Up
-            </button>
-          </li>
-        </ul>
-        <div class="tab-content pt-3" id="auth-tab-content">
-          <!-- Sign In Form -->
-          <div
-            class="tab-pane fade show active"
-            id="signin"
-            role="tabpanel"
-            aria-labelledby="signin-tab"
-          >
-            <form id="sign-in-form">
-              <div class="mb-3">
-                <label for="signin-username" class="form-label">Username</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="signin-username"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label for="signin-password" class="form-label">Password</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  id="signin-password"
-                  required
-                />
-              </div>
-              <button type="submit" class="btn btn-primary">Sign In</button>
-            </form>
-          </div>
-
-          <!-- Sign Up Form -->
-          <div
-            class="tab-pane fade"
-            id="signup"
-            role="tabpanel"
-            aria-labelledby="signup-tab"
-          >
-            <form id="sign-up-form">
-              <div class="mb-3">
-                <label for="signup-username" class="form-label">Username</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="signup-username"
-                  required
-                  autocomplete="username"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="signup-email" class="form-label">Email</label>
-                <input
-                  type="email"
-                  class="form-control"
-                  id="signup-email"
-                  required
-                  autocomplete="email"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="signup-password" class="form-label">Password</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  id="signup-password"
-                  required
-                  autocomplete="new-password"
-                />
-                <div class="form-text">
-                  Password must be at least 8 characters long.
+              <form id="sign-in-form">
+                <div class="mb-3">
+                  <label for="signin-username" class="form-label"
+                    >Username</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="signin-username"
+                    required
+                  />
                 </div>
-              </div>
-              <div class="mb-3">
-                <label for="signup-confirm-password" class="form-label"
-                  >Confirm Password</label
-                >
-                <input
-                  type="password"
-                  class="form-control"
-                  id="signup-confirm-password"
-                  required
-                  autocomplete="new-password"
-                />
-              </div>
-              <button type="submit" class="btn btn-primary">Sign Up</button>
-            </form>
+                <div class="mb-3">
+                  <label for="signin-password" class="form-label"
+                    >Password</label
+                  >
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="signin-password"
+                    required
+                  />
+                </div>
+                <button type="submit" class="btn btn-primary">Sign In</button>
+              </form>
+            </div>
+
+            <!-- Sign Up Form -->
+            <div
+              class="tab-pane fade"
+              id="signup"
+              role="tabpanel"
+              aria-labelledby="signup-tab"
+            >
+              <form id="sign-up-form">
+                <div class="mb-3">
+                  <label for="signup-username" class="form-label"
+                    >Username</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="signup-username"
+                    required
+                    autocomplete="username"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="signup-email" class="form-label">Email</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="signup-email"
+                    required
+                    autocomplete="email"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="signup-password" class="form-label"
+                    >Password</label
+                  >
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="signup-password"
+                    required
+                    autocomplete="new-password"
+                  />
+                  <div class="form-text">
+                    Password must be at least 8 characters long.
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="signup-confirm-password" class="form-label"
+                    >Confirm Password</label
+                  >
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="signup-confirm-password"
+                    required
+                    autocomplete="new-password"
+                  />
+                </div>
+                <button type="submit" class="btn btn-primary" onclick="signUp(username,email,password)">Sign Up</button>
+              </form>
+            </div>
           </div>
+        </h5>
+      </div>
+
+      <!-- Adding Items Box -->
+      <div class="box auth-required mt-4" style="display: none">
+        <div class="input-group mb-3">
+          <!-- Input Item -->
+          <input
+            id="new-name"
+            type="text"
+            class="form-control"
+            placeholder="Item"
+            aria-label="Item"
+          />
+          <span class="input-group-text">#</span>
+          <!-- Input Quantity -->
+          <input
+            id="new-quantity"
+            type="number"
+            min="1"
+            class="form-control"
+            placeholder="Quantity"
+            aria-label="Quantity"
+          />
         </div>
+        <div class="input-group mb-3">
+          <label class="input-group-text" for="new-type">Type</label>
+          <!-- Input Type -->
+          <select class="form-select" id="new-type">
+            <option selected>Choose...</option>
+            <option value="Fruit">Fruit</option>
+            <option value="Vegetable">Vegetable</option>
+            <option value="Meat">Meat</option>
+            <option value="Seafood">Seafood</option>
+            <option value="Grain">Grain</option>
+            <option value="Dairy">Dairy</option>
+          </select>
+        </div>
+        <div class="input-group mb-3">
+          <span class="input-group-text">$</span>
+          <!-- Input Price -->
+          <input
+            id="new-price"
+            type="number"
+            min="0"
+            step="0.01"
+            class="form-control"
+            placeholder="Price"
+            aria-label="Price"
+          />
+        </div>
+        <button id="add-item" type="button" class="btn btn-primary">
+          Add Item
+        </button>
       </div>
-    </h5>
 
-    <!-- Adding Items Box -->
-    <div class="box auth-required" style="display: none">
-      <div class="input-group mb-3">
-        <!-- Input Item -->
-        <input
-          id="new-name"
-          type="text"
-          class="form-control"
-          placeholder="Item"
-          aria-label="Item"
-        />
-        <span class="input-group-text">#</span>
-        <!-- Input Quanitity -->
-        <input
-          id="new-quantity"
-          type="text"
-          class="form-control"
-          placeholder="Quantity"
-          aria-label="Quantity"
-        />
+      <!-- Table -->
+      <table class="center auth-required mt-4" style="display: none">
+        <thead>
+          <tr>
+            <th scope="col">Item</th>
+            <th scope="col">Type</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Price in $</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody id="list-rows"></tbody>
+      </table>
+
+      <div class="auth-required mt-3" style="display: none">
+        <p>
+          <b>Total: $</b>
+          <span id="update-price">0</span>
+        </p>
       </div>
-      <div class="input-group mb-3">
-        <label class="input-group-text" for="inputGroupSelect01">Type</label>
-        <!-- Input Type -->
-        <select class="form-select" id="new-type">
-          <option selected>Choose...</option>
-          <option value="Fruit">Fruit</option>
-          <option value="Vegetable">Vegetable</option>
-          <option value="Meat">Meat</option>
-          <option value="Seafood">Seafood</option>
-          <option value="Grain">Grain</option>
-          <option value="Dairy">Dairy</option>
-        </select>
-      </div>
-      <div class="input-group input-group-sm mb-3">
-        <span class="input-group-text" id="inputGroup-sizing-sm">$</span>
-        <!-- Input Price -->
-        <input
-          id="new-price"
-          type="num"
-          min="0"
-          aria-label="Price"
-          aria-describedby="Price"
-        />
-      </div>
-      <button id="add-item" type="button" class="button">Add Item</button>
-      <!-- Add Button -->
     </div>
 
-    <!-- Table -->
-    <table class="center auth-required" style="display: none">
-      <thead>
-        <tr>
-          <th scope="col">Item</th>
-          <th scope="col">Type</th>
-          <th scope="col">Quantity</th>
-          <th scope="col">Price in $</th>
-          <th scope="col"></th>
-        </tr>
-      </thead>
-      <tbody id="list-rows"></tbody>
-    </table>
-    <div class="auth-required" style="display: none">
-      <p>
-        <b>Total: $</b>
-        <span id="update-price">0</span>
-      </p>
-    </div>
-    <script src="username-display.js"></script>
-    <script src="hide-auth.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
     <script src="auth.js"></script>
-    <script src="main.js">
-      /* main.js script here */
-    </script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // Check if password confirmation field exists
-        const confirmPasswordField = document.getElementById(
-          "signup-confirm-password"
-        );
-        if (confirmPasswordField) {
-          // Add form validation for matching passwords
-          document
-            .getElementById("sign-up-form")
-            .addEventListener("submit", function (e) {
-              const password = document.getElementById("signup-password").value;
-              const confirmPassword = confirmPasswordField.value;
-
-              if (password !== confirmPassword) {
-                e.preventDefault();
-                window.auth.showAlert("Passwords do not match", "danger");
-                return false;
-              }
-            });
-        }
-
-        // Handle sign-out button click
-        const signOutBtn = document.getElementById("sign-out-btn");
-        if (signOutBtn) {
-          signOutBtn.addEventListener("click", function () {
-            console.log("Sign-out button clicked");
-            handleSignOut();
-          });
-        }
-      });
-    </script>
+    <script src="main.js"></script>
   </body>
 </html>
