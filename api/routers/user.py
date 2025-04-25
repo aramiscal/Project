@@ -6,6 +6,11 @@ from passlib.context import CryptContext
 from api.auth.jwt_auth import Token, TokenData, create_access_token, decode_jwt_token
 from api.models.user import User, UserRequest
 
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 pwd_context = CryptContext(schemes=["bcrypt"])
 
 
@@ -29,14 +34,22 @@ def get_user(token: Annotated[str, Depends(oauth2_scheme)]) -> TokenData:
 user_router = APIRouter()
 
 
-@user_router.post("/signup")
+@user_router.post("/signup", status_code=status.HTTP_201_CREATED)
 async def sign_up(user: UserRequest):
-    existing_user = await User.find_one(User.username == user.username)
+    logger.info(f"Signup request received for username: {user.username}")
 
+    # Check if username already exists
+    existing_user = await User.find_one(User.username == user.username)
     if existing_user:
-        raise HTTPException(status_code=400, detail="User already exists")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists")
+    
+    #Check if email already exists
+    existing_email = await User.find_one(User.email == user.email)
+    if existing_email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already in use")
 
     hashed_pwd = hash_password.create_hash(user.password)
+    logger.info("Creating user object...")
     new_user = User(username=user.username, password=hashed_pwd, email=user.email)
     await new_user.insert()
     print(f"User created: {user.username}")

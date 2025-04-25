@@ -3,9 +3,14 @@ const storeToken = (token) => {
   localStorage.setItem("access_token", token);
 };
 
+const storeUserInfo = (username) => {
+  localStorage.setItem("username", username);
+};
+
 // Remove token when logging out
 const removeToken = () => {
   localStorage.removeItem("access_token");
+  localStorage.removeItem("username");
 };
 
 const isLoggedIn = () => {
@@ -34,14 +39,40 @@ const updateUI = () => {
     : "none";
 
   if (isAuthenticated) {
-    document.getElementById("username-display").textContent =
-      "Authenticated User";
+    document.getElementById("username-display").textContent = getUsername();
   }
+
+  const mainContentElements = document.querySelectorAll(".auth-required");
+  mainContentElements.forEach((element) => {
+    element.style.display = isAuthenticated ? "block" : "none";
+  });
+};
+
+// Form control: Password must be greater than 8 characters
+const validatePassword = (password) => {
+  return password.length >= 8;
+};
+
+// Form control: email must be valid
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
 };
 
 // Sign Up
 const signUp = (username, email, password) => {
   return new Promise((resolve, reject) => {
+    // Validate Inputs
+    if (!validatePassword(password)) {
+      reject({ detail: "Password must be at least 8 characters long" });
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      reject({ detail: "Please enter a valid email address" });
+      return;
+    }
+
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
@@ -65,6 +96,12 @@ const signUp = (username, email, password) => {
 // Sign In
 const signIn = (username, password) => {
   return new Promise((resolve, reject) => {
+    // Username and Password are required
+    if (!username || !password) {
+      reject({ detail: "Username and password are required" });
+      return;
+    }
+
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
@@ -95,6 +132,8 @@ const signIn = (username, password) => {
 const signOut = () => {
   removeToken();
   updateUI();
+  // REload page to clear user-specific data
+  window.location.reload();
 };
 
 // Initialize auth state
@@ -123,6 +162,9 @@ const initAuth = () => {
           error.detail || "Sign-up failed. Please try again.",
           "danger"
         );
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
       }
     });
 
@@ -138,14 +180,20 @@ const initAuth = () => {
         await signIn(username, password);
         showAlert(`Welcome back, ${username}!`, "success");
         updateUI();
+        // Fetch user-specific data
+        getList();
       } catch (error) {
         showAlert(
           error.detail || "Sign-in failed. Please check your credentials.",
           "danger"
         );
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
       }
     });
 
+  // Sign Out button handler
   document.getElementById("sign-out-btn").addEventListener("click", () => {
     signOut();
     showAlert("You have been signed out.", "info");
@@ -165,3 +213,11 @@ const showAlert = (message, type = "info") => {
 
   alertContainer.appendChild(alert);
 };
+
+window.auth = {
+  isLoggedIn,
+  getToken,
+  addAuthHeader,
+  signOut,
+  showAlert
+}

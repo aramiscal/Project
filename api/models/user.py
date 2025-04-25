@@ -15,3 +15,8 @@ class UserRequest(BaseModel):
     username: str
     email: str
     password: str # plain text from user input
+
+class UserResponse(BaseModel):
+    username: str
+    email: str
+    password: str

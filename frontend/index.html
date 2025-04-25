@@ -75,8 +75,9 @@
     <div id="alert-container" class="container mt-3"></div>
 
     <!-- User Info -->
-    <div id="signed-in-user" class="user-info" style="display: none">
-      <span id="username-display"></span>
+    <div id="signed-in-user" class="user-info d-flex justify-content-end align-items-center p-2" style="display: none">
+      <span class="me-2">Welcome</span>
+      <span id="username-display" class="fw-bold me-3"></span>
       <button id="sign-out-btn" class="btn btn-outline-secondary btn-sm ms-2">
         Sign Out
       </button>
@@ -160,6 +161,7 @@
                   class="form-control"
                   id="signup-username"
                   required
+                  autocomplete="username"
                 />
               </div>
               <div class="mb-3">
@@ -169,6 +171,7 @@
                   class="form-control"
                   id="signup-email"
                   required
+                  autocomplete="email"
                 />
               </div>
               <div class="mb-3">
@@ -178,6 +181,18 @@
                   class="form-control"
                   id="signup-password"
                   required
+                  autocomplete="new-password"
+                />
+                <div class="form-text">Password must be at least 8 characters long.</div>
+              </div>
+              <div class="mb-3">
+                <label for="signup-confirm-password" class="form-label">Confirm Password</label>
+                <input 
+                type="password" 
+                class="form-control" 
+                id="signup-confirm-password" 
+                required 
+                autocomplete="new-password"
                 />
               </div>
               <button type="submit" class="btn btn-primary">Sign Up</button>
@@ -249,7 +264,7 @@
       </thead>
       <tbody id="list-rows"></tbody>
     </table>
-    <div>
+    <div class="auth-required" style="display: none">
       <p>
         <b>Total: $</b>
         <span id="update-price"></span>
@@ -263,6 +278,26 @@
     <script src="auth.js"></script>
     <script src="main.js">
       /* main.js script here */
+    </script>
+    <script>
+      // Add this to verify passwords match
+      document.addEventListener('DOMContentLoaded', function() {
+        // Check if password confirmation field exists
+        const confirmPasswordField = document.getElementById('signup-confirm-password');
+        if (confirmPasswordField) {
+          // Add form validation for matching passwords
+          document.getElementById('sign-up-form').addEventListener('submit', function(e) {
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = confirmPasswordField.value;
+            
+            if (password !== confirmPassword) {
+              e.preventDefault();
+              showAlert('Passwords do not match', 'danger');
+              return false;
+            }
+          });
+        }
+      });
     </script>
   </body>
 </html>
