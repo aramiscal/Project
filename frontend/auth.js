@@ -9,7 +9,7 @@ const storeUserInfo = (username) => {
 
 const getUsername = () => {
   return localStorage.getItem("username");
-}
+};
 
 // Remove token when logging out
 const removeToken = () => {
@@ -151,7 +151,7 @@ const signIn = (username, password) => {
 const signOut = () => {
   removeToken();
   updateUI();
-  // REload page to clear user-specific data
+  // Reload page to clear user-specific data
   window.location.reload();
 };
 
@@ -259,5 +259,5 @@ window.auth = {
   addAuthHeader,
   signOut,
   showAlert,
-  getUsername
+  getUsername,
 };

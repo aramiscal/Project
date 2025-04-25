@@ -11,9 +11,11 @@ class LoginResult(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
-class Token(BaseModel):  # Add the missing Token class
+
+class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
 
 class TokenData(BaseModel):
     username: str
@@ -37,7 +39,6 @@ def decode_jwt_token(token: str) -> TokenData | None:
     try:
         key = get_settings().secret_key
         payload = jwt.decode(token, key, algorithms=[ALGORITHM])
-        print(payload)
         username: str = payload.get("username")
         role: str = payload.get("role", "")
         exp: int = payload.get("exp")
@@ -45,5 +46,4 @@ def decode_jwt_token(token: str) -> TokenData | None:
             username=username, role=role, exp_datetime=datetime.fromtimestamp(exp)
         )
     except jwt.InvalidTokenError:
-        print("Invalid JWT token.")
         return None

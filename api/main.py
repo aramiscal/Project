@@ -7,14 +7,14 @@ from api.database.db_context import init_database
 from api.routers.list_routes import list_router
 from api.routers.user import user_router
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # on startup event
-    print("Application Starts...")
     await init_database()
     # on shutdown event
-    yield 
-    print("Application Ends...")
+    yield
+
 
 app = FastAPI(title="Shopping List", version="2.0.0", lifespan=lifespan)
 
@@ -23,8 +23,10 @@ app.include_router(user_router, tags=["Users"], prefix="/users")
 
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"])
 
+
 @app.get("/")
 async def welcome() -> dict:
     return FileResponse("./frontend/index.html")
+
 
 app.mount("/", StaticFiles(directory="./frontend"), name="static")

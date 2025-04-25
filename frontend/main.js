@@ -3,30 +3,30 @@ const api = "/list";
 const addPrice = (list) => {
   let total_price = 0;
   const p = document.getElementById("update-price");
-  for(let i = 0; i < list.length; i++) {
+  for (let i = 0; i < list.length; i++) {
     total_price = total_price + list[i].price;
   }
   p.innerHTML = total_price;
-}
+};
 
 const resetInput = () => {
-  document.getElementById('new-name').value = '';
-  document.getElementById('new-quantity').value = '';
-  document.getElementById('new-type').value = '';
-  document.getElementById('new-price').value = '';
-}
+  document.getElementById("new-name").value = "";
+  document.getElementById("new-quantity").value = "";
+  document.getElementById("new-type").value = "";
+  document.getElementById("new-price").value = "";
+};
 
-document.getElementById('add-item').addEventListener('click', (e) => {
+document.getElementById("add-item").addEventListener("click", (e) => {
   e.preventDefault();
   postItem();
-})
+});
 
 const postItem = () => {
-  const nameInput = document.getElementById('new-name').value;
-  const quantityInput = document.getElementById('new-quantity').value;
+  const nameInput = document.getElementById("new-name").value;
+  const quantityInput = document.getElementById("new-quantity").value;
   const quantityToInt = parseInt(quantityInput, 10);
-  const typeInput = document.getElementById('new-type').value;
-  const priceInput = document.getElementById('new-price').value;
+  const typeInput = document.getElementById("new-type").value;
+  const priceInput = document.getElementById("new-price").value;
   const priceToInt = parseFloat(priceInput);
 
   const xhr = new XMLHttpRequest();
@@ -37,16 +37,18 @@ const postItem = () => {
     }
   };
 
-  xhr.open('POST', api, true);
-  xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+  xhr.open("POST", api, true);
+  xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
   addAuthHeader(xhr);
-  xhr.send(JSON.stringify({ 
-    name: nameInput, 
-    type: typeInput, 
-    quantity: quantityToInt, 
-    price: priceToInt 
-  }));
-}
+  xhr.send(
+    JSON.stringify({
+      name: nameInput,
+      type: typeInput,
+      quantity: quantityToInt,
+      price: priceToInt,
+    })
+  );
+};
 
 const deleteItem = (name) => {
   const xhr = new XMLHttpRequest();
@@ -56,13 +58,13 @@ const deleteItem = (name) => {
     }
   };
 
-  xhr.open('DELETE', `${api}/${name}`, true);
+  xhr.open("DELETE", `${api}/${name}`, true);
   addAuthHeader(xhr);
   xhr.send();
 };
 
 const displayList = (list) => {
-  list.sort((a,b) => a.type.localeCompare(b.type));
+  list.sort((a, b) => a.type.localeCompare(b.type));
   const tbody = document.getElementById("list-rows");
   tbody.innerHTML = "";
   const rows = list.map((x) => {

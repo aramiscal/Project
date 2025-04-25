@@ -1,5 +1,4 @@
 from datetime import datetime
-import traceback
 from typing import Annotated
 from beanie import WriteRules
 from fastapi import APIRouter, Depends, HTTPException, Response, status
@@ -9,11 +8,6 @@ from pydantic import ValidationError
 
 from api.auth.jwt_auth import Token, TokenData, create_access_token, decode_jwt_token
 from api.models.user import User, UserRequest, UserResponse
-
-import logging
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -31,7 +25,6 @@ hash_password = HashPassword()
 
 
 def get_user(token: Annotated[str, Depends(oauth2_scheme)]) -> TokenData:
-    print(token)
     return decode_jwt_token(token)
 
 
@@ -43,20 +36,16 @@ async def sign_up(user: UserRequest, response: Response):
     """
     Sign up a new user and store in the database
     """
-    logger.info(f"Signup request received for username: {user.username}")
-
     try:
-        # Check if username already exists - direct MongoDB query approach
+        # Check if username already exists
         existing_user = await User.find_one(User.username == user.username)
         if existing_user:
-            logger.warning(f"Username {user.username} already exists")
             response.status_code = status.HTTP_400_BAD_REQUEST
             return {"detail": "User already exists"}
 
-        # Check if email already exists - direct MongoDB query approach
+        # Check if email already exists
         existing_email = await User.find_one(User.email == user.email)
         if existing_email:
-            logger.warning(f"Email {user.email} already in use")
             response.status_code = status.HTTP_400_BAD_REQUEST
             return {"detail": "Email already in use"}
 
@@ -64,7 +53,6 @@ async def sign_up(user: UserRequest, response: Response):
         hashed_pwd = hash_password.create_hash(user.password)
 
         # Create the new user document
-        logger.info(f"Creating user object for {user.username}")
         new_user = User(
             username=user.username,
             email=user.email,
@@ -74,41 +62,21 @@ async def sign_up(user: UserRequest, response: Response):
         )
 
         # Save the user document to MongoDB
-        logger.info(f"Attempting to save user {user.username} to database")
         try:
             # Insert into database
             result = await new_user.insert()
-            logger.info(
-                f"User {user.username} successfully created with ID: {result.id}"
-            )
-
-            # Check if the user was actually saved
-            saved_user = await User.find_one(User.username == user.username)
-            if saved_user:
-                logger.info(
-                    f"Successfully verified user {user.username} exists in database"
-                )
-            else:
-                logger.error(
-                    f"Failed to verify user {user.username} in database after creation"
-                )
 
             return {"message": "User created successfully"}
 
         except ValidationError as e:
-            logger.error(f"Validation error creating user: {str(e)}")
             response.status_code = status.HTTP_400_BAD_REQUEST
             return {"detail": f"Validation error: {str(e)}"}
 
         except WriteRules as e:
-            logger.error(f"Write rules violation creating user: {str(e)}")
             response.status_code = status.HTTP_400_BAD_REQUEST
             return {"detail": f"Database write error: {str(e)}"}
 
     except Exception as e:
-        # Log detailed error with traceback
-        logger.error(f"Unexpected error creating user {user.username}: {str(e)}")
-        logger.error(traceback.format_exc())
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"detail": f"Failed to create user: {str(e)}"}
 
@@ -127,7 +95,6 @@ async def login_for_access_token(
         # Find the user in the database
         existing_user = await User.find_one(User.username == username)
         if not existing_user:
-            logger.warning(f"Sign-in attempt with non-existent username: {username}")
             response.status_code = status.HTTP_401_UNAUTHORIZED
             return {
                 "access_token": "",
@@ -149,10 +116,8 @@ async def login_for_access_token(
             access_token = create_access_token(
                 {"username": username, "role": existing_user.role}
             )
-            logger.info(f"User {username} successfully authenticated")
             return Token(access_token=access_token)
         else:
-            logger.warning(f"Failed authentication attempt for user: {username}")
             response.status_code = status.HTTP_401_UNAUTHORIZED
             return {
                 "access_token": "",
@@ -161,7 +126,6 @@ async def login_for_access_token(
             }
 
     except Exception as e:
-        logger.error(f"Error during sign-in: {str(e)}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {
             "access_token": "",
@@ -188,7 +152,6 @@ async def get_current_user(token_data: Annotated[TokenData, Depends(get_user)]):
             created_at=user.created_at,
         )
     except Exception as e:
-        logger.error(f"Error retrieving user profile: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve user profile: {str(e)}",
