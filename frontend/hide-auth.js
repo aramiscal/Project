@@ -1,8 +1,28 @@
 // This function will hide the auth UI
 function hideAuthContainer() {
-  // Try multiple selectors to find the auth container
+  // Get the auth container by ID (preferred method)
+  const authContainer = document.getElementById("auth-container");
+  if (authContainer) {
+    console.log("Found auth container by ID");
+    authContainer.style.display = "none";
+
+    // Enable auth-required elements
+    document.querySelectorAll(".auth-required").forEach((el) => {
+      el.style.display = "block";
+    });
+
+    // Show signed-in user info
+    const signedInUser = document.getElementById("signed-in-user");
+    if (signedInUser) {
+      signedInUser.style.display = "block";
+    }
+
+    console.log("Auth UI hidden");
+    return;
+  }
+
+  // If we couldn't find it by ID, try alternative selectors
   const selectors = [
-    "#auth-container", // By ID (if you added the ID)
     ".auth-container", // By class
     "div:has(.nav-tabs#auth-tab)", // By content
     "h5 > div", // By structure (from your HTML)
@@ -20,21 +40,86 @@ function hideAuthContainer() {
         console.log("Hiding element:", el);
         el.style.display = "none";
       });
+
+      // Enable auth-required elements
+      document.querySelectorAll(".auth-required").forEach((el) => {
+        el.style.display = "block";
+      });
+
+      // Show signed-in user info
+      const signedInUser = document.getElementById("signed-in-user");
+      if (signedInUser) {
+        signedInUser.style.display = "block";
+      }
+
+      console.log("Auth UI hiding complete");
+      return;
     }
   }
 
-  // Enable auth-required elements
-  document.querySelectorAll(".auth-required").forEach((el) => {
-    el.style.display = "block";
-  });
+  console.warn("Could not find auth container with any selector");
+}
 
-  // Show signed-in user info
-  const signedInUser = document.getElementById("signed-in-user");
-  if (signedInUser) {
-    signedInUser.style.display = "block";
+// This function will show the auth UI
+function showAuthContainer() {
+  // Get the auth container by ID (preferred method)
+  const authContainer = document.getElementById("auth-container");
+  if (authContainer) {
+    console.log("Found auth container by ID");
+    authContainer.style.display = "block";
+
+    // Disable auth-required elements
+    document.querySelectorAll(".auth-required").forEach((el) => {
+      el.style.display = "none";
+    });
+
+    // Hide signed-in user info
+    const signedInUser = document.getElementById("signed-in-user");
+    if (signedInUser) {
+      signedInUser.style.display = "none";
+    }
+
+    console.log("Auth UI shown");
+    return;
   }
 
-  console.log("Auth UI hiding complete");
+  // If we couldn't find it by ID, try alternative selectors
+  const selectors = [
+    ".auth-container", // By class
+    "div:has(.nav-tabs#auth-tab)", // By content
+    "h5 > div", // By structure (from your HTML)
+    "h5 div", // Alternative structure
+  ];
+
+  // Try each selector until we find something
+  for (const selector of selectors) {
+    const elements = document.querySelectorAll(selector);
+    if (elements.length > 0) {
+      console.log(
+        `Found ${elements.length} elements with selector: ${selector}`
+      );
+      elements.forEach((el) => {
+        console.log("Showing element:", el);
+        el.style.display = "block";
+      });
+
+      // Disable auth-required elements
+      document.querySelectorAll(".auth-required").forEach((el) => {
+        el.style.display = "none";
+      });
+
+      // Hide signed-in user info
+      const signedInUser = document.getElementById("signed-in-user");
+      if (signedInUser) {
+        signedInUser.style.display = "none";
+      }
+
+      console.log("Auth UI showing complete");
+      return;
+    }
+  }
+
+  console.warn("Could not find auth container with any selector");
 }
 
 // Function to override the existing sign-in function
@@ -56,6 +141,31 @@ function patchSignIn() {
     };
   } else {
     console.warn("signIn function not found, cannot patch");
+  }
+}
+
+// Function to override the existing sign-out function
+function patchSignOut() {
+  // Check if the original sign-out function exists
+  if (
+    typeof window.auth !== "undefined" &&
+    typeof window.auth.signOut === "function"
+  ) {
+    console.log("Patching signOut function");
+    // Store the original function
+    const originalSignOut = window.auth.signOut;
+
+    // Replace with our patched version
+    window.auth.signOut = function () {
+      console.log("Patched signOut called");
+      originalSignOut();
+
+      // Ensure the auth container is shown
+      console.log("Ensuring auth UI is shown");
+      showAuthContainer();
+    };
+  } else {
+    console.warn("signOut function not found, cannot patch");
   }
 }
 
@@ -114,6 +224,62 @@ function patchSignInForm() {
   }
 }
 
+// Patch the sign-out button
+function patchSignOutButton() {
+  const button = document.getElementById("sign-out-btn");
+  if (button) {
+    console.log("Patching sign-out button");
+
+    // Remove existing listeners
+    const newButton = button.cloneNode(true);
+    button.parentNode.replaceChild(newButton, button);
+
+    // Add our listener
+    newButton.addEventListener("click", function () {
+      console.log("Sign-out button clicked (patched handler)");
+
+      // Clear localStorage
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("username");
+
+      // Show auth UI
+      showAuthContainer();
+
+      // Clear the shopping list
+      const listRows = document.getElementById("list-rows");
+      if (listRows) {
+        listRows.innerHTML = "";
+      }
+
+      // Reset total price
+      const totalPrice = document.getElementById("update-price");
+      if (totalPrice) {
+        totalPrice.textContent = "0";
+      }
+
+      // Show alert
+      if (
+        typeof window.auth !== "undefined" &&
+        typeof window.auth.showAlert === "function"
+      ) {
+        window.auth.showAlert("You have been signed out successfully.", "info");
+      } else {
+        const alertContainer = document.getElementById("alert-container");
+        if (alertContainer) {
+          const alert = document.createElement("div");
+          alert.className = "alert alert-info alert-dismissible fade show";
+          alert.role = "alert";
+          alert.innerHTML = `
+            You have been signed out successfully.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          `;
+          alertContainer.appendChild(alert);
+        }
+      }
+    });
+  }
+}
+
 // Check if user is logged in and hide auth UI if they are
 function checkAuthState() {
   const token = localStorage.getItem("access_token");
@@ -122,6 +288,7 @@ function checkAuthState() {
     hideAuthContainer();
   } else {
     console.log("User is not logged in, showing auth UI");
+    showAuthContainer();
   }
 }
 
@@ -136,7 +303,11 @@ document.addEventListener("DOMContentLoaded", function () {
   patchSignIn();
   patchSignInForm();
 
-  // Direct way to handle the sign in button click
+  // Patch the sign-out functionality
+  patchSignOut();
+  patchSignOutButton();
+
+  // Direct  way to handle the sign in button click
   document
     .querySelectorAll('#sign-in-form button[type="submit"]')
     .forEach((button) => {
@@ -190,5 +361,6 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 })();
 
-// Expose the function globally so it can be called from console for debugging
+// Expose functions globally so they can be called from anywhere
 window.hideAuthUI = hideAuthContainer;
+window.showAuthUI = showAuthContainer;

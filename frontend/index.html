@@ -94,7 +94,7 @@
     >
       <span class="me-2">Welcome</span>
       <span id="username-display" class="fw-bold me-3"></span>
-      <button id="sign-out-btn" class="btn btn-outline-secondary btn-sm ms-2" onclick="handleSignOut()">
+      <button id="sign-out-btn" class="btn btn-outline-secondary btn-sm ms-2">
         Sign Out
       </button>
     </div>
@@ -215,9 +215,7 @@
                   autocomplete="new-password"
                 />
               </div>
-              <button type="button" class="btn btn-primary" onclick="signUp()">
-                Sign Up
-              </button>
+              <button type="submit" class="btn btn-primary">Sign Up</button>
             </form>
           </div>
         </div>
@@ -225,7 +223,7 @@
     </h5>
 
     <!-- Adding Items Box -->
-    <div class="box">
+    <div class="box auth-required" style="display: none">
       <div class="input-group mb-3">
         <!-- Input Item -->
         <input
@@ -274,7 +272,7 @@
     </div>
 
     <!-- Table -->
-    <table class="center">
+    <table class="center auth-required" style="display: none">
       <thead>
         <tr>
           <th scope="col">Item</th>
@@ -289,7 +287,7 @@
     <div class="auth-required" style="display: none">
       <p>
         <b>Total: $</b>
-        <span id="update-price"></span>
+        <span id="update-price">0</span>
       </p>
     </div>
     <script src="username-display.js"></script>
@@ -319,10 +317,19 @@
 
               if (password !== confirmPassword) {
                 e.preventDefault();
-                showAlert("Passwords do not match", "danger");
+                window.auth.showAlert("Passwords do not match", "danger");
                 return false;
               }
             });
+        }
+
+        // Handle sign-out button click
+        const signOutBtn = document.getElementById("sign-out-btn");
+        if (signOutBtn) {
+          signOutBtn.addEventListener("click", function () {
+            console.log("Sign-out button clicked");
+            handleSignOut();
+          });
         }
       });
     </script>
