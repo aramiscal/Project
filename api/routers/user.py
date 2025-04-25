@@ -33,9 +33,6 @@ user_router = APIRouter()
 
 @user_router.post("/signup", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def sign_up(user: UserRequest, response: Response):
-    """
-    Sign up a new user and store in the database
-    """
     try:
         # Check if username already exists
         existing_user = await User.find_one(User.username == user.username)
@@ -85,9 +82,6 @@ async def sign_up(user: UserRequest, response: Response):
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()], response: Response
 ) -> Token:
-    """
-    Authenticate user and provide access token
-    """
     try:
         ## Authenticate user by verifying the user in DB
         username = form_data.username
@@ -136,9 +130,6 @@ async def login_for_access_token(
 
 @user_router.get("/me", response_model=UserResponse)
 async def get_current_user(token_data: Annotated[TokenData, Depends(get_user)]):
-    """
-    Get current user information
-    """
     try:
         user = await User.find_one(User.username == token_data.username)
         if not user:
