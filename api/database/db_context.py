@@ -29,6 +29,7 @@ async def init_database():
         # Get configuration
         my_config = get_settings()
         connection_string = my_config.connection_string
+        print(f"Connection to MongoDB with connection string: {connection_string}")
 
         # Create motor client with connection options
         client = AsyncIOMotorClient(connection_string, **client_options)
@@ -55,7 +56,9 @@ async def init_database():
             allow_index_dropping=True,  # Recreate indexes if needed
         )
 
+        print("Database initiailization completed successfully")
         return client, db
     except Exception as e:
+        print(f"Database initialization failed: {str(e)}")
         # Re-raise to let the application know initialization failed
         raise

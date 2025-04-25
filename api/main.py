@@ -30,3 +30,7 @@ async def welcome() -> dict:
 
 
 app.mount("/", StaticFiles(directory="./frontend"), name="static")
+
+
+print("Server starting up...")
+

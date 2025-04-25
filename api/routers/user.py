@@ -49,6 +49,8 @@ async def sign_up(user: UserRequest, response: Response):
         # Hash the password
         hashed_pwd = hash_password.create_hash(user.password)
 
+        print(f"Creating user: {user.username}")
+
         # Create the new user document
         new_user = User(
             username=user.username,
@@ -58,14 +60,18 @@ async def sign_up(user: UserRequest, response: Response):
             created_at=datetime.utcnow(),
         )
 
+        print(f"User document created: {new_user}")
+
         # Save the user document to MongoDB
         try:
             # Insert into database
             result = await new_user.insert()
+            print(f"Insert result: {result}")
 
             return {"message": "User created successfully"}
 
         except ValidationError as e:
+            print(f"Database insertion eror: {str(e)}")
             response.status_code = status.HTTP_400_BAD_REQUEST
             return {"detail": f"Validation error: {str(e)}"}
 
@@ -74,6 +80,7 @@ async def sign_up(user: UserRequest, response: Response):
             return {"detail": f"Database write error: {str(e)}"}
 
     except Exception as e:
+        print(f"General error in sign_up: {str(e)}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"detail": f"Failed to create user: {str(e)}"}
 

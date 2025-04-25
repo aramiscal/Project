@@ -78,8 +78,12 @@ const signUp = (username, email, password) => {
     }
 
     const xhr = new XMLHttpRequest();
+    // In frontend/auth.js in the signUp function:
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
+        console.log(`Sign-up response status: ${xhr.status}`);
+        console.log(`Sign-up response text: ${xhr.responseText}`);
+
         if (xhr.status === 201) {
           // 201 Created status - success
           resolve(JSON.parse(xhr.responseText));
@@ -89,9 +93,11 @@ const signUp = (username, email, password) => {
           try {
             if (xhr.responseText) {
               const errorResponse = JSON.parse(xhr.responseText);
+              console.error("Error response:", errorResponse);
               errorMessage = errorResponse.detail || "Sign-up failed";
             }
           } catch (e) {
+            console.error("Error parsing response:", e);
             // If parsing fails, use default error message
             errorMessage = "Something went wrong during sign-up";
           }
