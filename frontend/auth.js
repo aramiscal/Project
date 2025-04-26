@@ -36,21 +36,77 @@ const addAuthHeader = (xhr) => {
   }
 };
 
-// Function to ensure username is displayed
-function updateUsernameDisplay() {
-  const username = getUsername();
+// Improved function to ensure username is displayed next to "Welcome"
+function enhanceUsernameDisplay() {
+  console.log("Enhancing username display");
+
+  // Get username from localStorage
+  const username = localStorage.getItem("username");
+
+  // Get the username display element
   const usernameDisplay = document.getElementById("username-display");
 
   if (username && usernameDisplay) {
+    // Set the username text
     usernameDisplay.textContent = username;
+    console.log("Username display updated to:", username);
 
-    // Make sure the user info container is visible
+    // Make sure the signed-in user container is visible
     const signedInUser = document.getElementById("signed-in-user");
     if (signedInUser) {
-      signedInUser.style.display = "block";
+      signedInUser.style.display = "flex"; // Using flex for proper alignment
+      console.log("Signed-in user info container made visible");
     }
+  } else {
+    console.warn(
+      "Username not displayed:",
+      username ? "Username found in storage" : "Username not found in storage",
+      usernameDisplay ? "Display element found" : "Display element not found"
+    );
   }
 }
+
+// Call this function after successful sign-in
+document.addEventListener("DOMContentLoaded", function () {
+  console.log("DOM loaded, checking for username display");
+
+  // Check if user is logged in
+  const token = localStorage.getItem("access_token");
+  if (token) {
+    console.log("User appears to be logged in, showing username");
+    enhanceUsernameDisplay();
+
+    // Also override the existing updateUsernameDisplay function if it exists
+    if (typeof window.updateUsernameDisplay === "function") {
+      console.log("Overriding existing updateUsernameDisplay function");
+      window.updateUsernameDisplay = enhanceUsernameDisplay;
+    }
+  }
+
+  // Add this function to the sign-in process
+  const signInForm = document.getElementById("sign-in-form");
+  if (signInForm) {
+    signInForm.addEventListener("submit", function () {
+      // Check after a slight delay to allow the login to complete
+      setTimeout(enhanceUsernameDisplay, 1000);
+    });
+  }
+
+  // Make sure any direct sign-in button also triggers username display
+  const signInButton = document.querySelector('#signin button[type="submit"]');
+  if (signInButton) {
+    signInButton.addEventListener("click", function () {
+      // Check after a slight delay to allow the login to complete
+      setTimeout(enhanceUsernameDisplay, 1000);
+    });
+  }
+
+  // Also set an interval to check periodically
+  setInterval(enhanceUsernameDisplay, 2000);
+});
+
+// Make the function available globally
+window.enhanceUsernameDisplay = enhanceUsernameDisplay;
 
 // Update UI (Signin/Signup)
 const updateUI = () => {
@@ -104,20 +160,43 @@ const signUp = () => {
 
   // Check if passwords match
   if (password !== confirmPassword) {
-    showAlert("Passwords do not match", "danger");
+    if (typeof window.quickAlert === "function") {
+      window.quickAlert("Passwords do not match", "danger");
+    } else {
+      showAlert("Passwords do not match", "danger");
+    }
     return;
   }
 
   // Check if password is valid
   if (!validatePassword(password)) {
-    showAlert("Password must be at least 8 characters long", "danger");
+    if (typeof window.quickAlert === "function") {
+      window.quickAlert(
+        "Password must be at least 8 characters long",
+        "danger"
+      );
+    } else {
+      showAlert("Password must be at least 8 characters long", "danger");
+    }
     return;
   }
 
   // Check if email is valid
   if (!validateEmail(email)) {
-    showAlert("Please enter a valid email address", "danger");
+    if (typeof window.quickAlert === "function") {
+      window.quickAlert("Please enter a valid email address", "danger");
+    } else {
+      showAlert("Please enter a valid email address", "danger");
+    }
     return;
+  }
+
+  // Show loading indicator
+  const submitBtn = document.querySelector('#signup button[type="submit"]');
+  const originalText = submitBtn ? submitBtn.textContent : "Sign Up";
+  if (submitBtn) {
+    submitBtn.textContent = "Signing up...";
+    submitBtn.disabled = true;
   }
 
   // Hide the auth container when Sign Up is clicked
@@ -129,9 +208,21 @@ const signUp = () => {
   const xhr = new XMLHttpRequest();
   xhr.onreadystatechange = () => {
     if (xhr.readyState == 4) {
+      // Reset button state
+      if (submitBtn) {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+
       if (xhr.status == 201) {
+        // Log the response for debugging
+        console.log("Sign-up successful! Server response:", xhr.responseText);
+
         // Show the sign-in tab with a success message
-        showAlert("Sign-up successful! Please sign in.", "success");
+        showAlert(
+          "Sign-up successful! Your account has been created in MongoDB. Please sign in.",
+          "success"
+        );
 
         const signinTab = document.getElementById("signin-tab");
         if (signinTab) {
@@ -159,8 +250,20 @@ const signUp = () => {
         try {
           const response = JSON.parse(xhr.responseText);
           showAlert(response.detail || "Sign-up failed", "danger");
+          console.error("Sign-up error:", response);
         } catch (e) {
-          showAlert("Sign-up failed. Please try again.", "danger");
+          showAlert(
+            "Sign-up failed. Could not save to MongoDB. Please try again.",
+            "danger"
+          );
+          console.error(
+            "Sign-up error parsing response:",
+            e,
+            "Status:",
+            xhr.status,
+            "Response:",
+            xhr.responseText
+          );
         }
 
         if (authContainer) {
@@ -170,10 +273,22 @@ const signUp = () => {
     }
   };
 
+  // Create user object to be stored in MongoDB
+  const userData = {
+    username: username,
+    email: email,
+    password: password,
+  };
+
+  // Send the request to the backend API endpoint that handles MongoDB insertion
   xhr.open("POST", "/users/signup", true);
   xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-  xhr.send(JSON.stringify({ username, email, password }));
-  console.log("Sign up request sent for user:", username);
+  xhr.send(JSON.stringify(userData));
+  console.log(
+    "Sign up request sent for user:",
+    username,
+    "Data will be stored in MongoDB 'users' collection"
+  );
 };
 
 // Sign In
@@ -218,6 +333,9 @@ const signIn = (username, password) => {
             // Update username display
             updateUsernameDisplay();
 
+            // Show shopping list UI elements
+            showShoppingListUI();
+
             resolve(response);
           } catch (e) {
             console.error("Error parsing response:", e);
@@ -249,43 +367,64 @@ const signIn = (username, password) => {
   });
 };
 
-// Enhanced Sign Out functionality
-const signOut = () => {
+// Enhanced Sign Out function
+function improvedSignOut() {
   console.log("Sign out initiated");
 
-  // Clear authentication data
-  removeToken();
+  // Clear authentication data from localStorage
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("username");
 
   // Show the authentication UI
   const authContainer = document.getElementById("auth-container");
   if (authContainer) {
     authContainer.style.display = "block";
-    console.log("Auth container display set to: block");
+    authContainer.style.visibility = "visible";
+    console.log("Auth container shown");
+  } else {
+    console.error("Auth container not found!");
   }
 
   // Hide the signed-in user display
   const signedInUser = document.getElementById("signed-in-user");
   if (signedInUser) {
     signedInUser.style.display = "none";
-    console.log("Signed in user display set to: none");
+    console.log("Signed-in user info hidden");
   }
 
   // Clear the shopping list in the UI
   const listRows = document.getElementById("list-rows");
   if (listRows) {
     listRows.innerHTML = "";
+    console.log("Shopping list cleared");
   }
 
   // Reset the total price
   const totalPrice = document.getElementById("update-price");
   if (totalPrice) {
     totalPrice.textContent = "0";
+    console.log("Total price reset");
   }
 
   // Hide all elements that require authentication
-  const authRequiredElements = document.querySelectorAll(".auth-required");
-  authRequiredElements.forEach((element) => {
+  const tableElements = document.querySelectorAll("table.auth-required");
+  tableElements.forEach((element) => {
     element.style.display = "none";
+    console.log("Table element hidden");
+  });
+
+  const boxElements = document.querySelectorAll(".box.auth-required");
+  boxElements.forEach((element) => {
+    element.style.display = "none";
+    console.log("Box element hidden");
+  });
+
+  const otherAuthElements = document.querySelectorAll(
+    ".auth-required:not(table):not(.box)"
+  );
+  otherAuthElements.forEach((element) => {
+    element.style.display = "none";
+    console.log("Other auth element hidden");
   });
 
   // Reset input fields
@@ -296,12 +435,24 @@ const signOut = () => {
 
   if (nameInput) nameInput.value = "";
   if (quantityInput) quantityInput.value = "";
-  if (typeInput) typeInput.value = "";
+  if (typeInput) typeInput.value = "Choose...";
   if (priceInput) priceInput.value = "";
+  console.log("Input fields reset");
 
   // Show a success message
-  showAlert("You have been signed out successfully.", "info");
-};
+  const alertContainer = document.getElementById("alert-container");
+  if (alertContainer) {
+    const alert = document.createElement("div");
+    alert.className = "alert alert-info alert-dismissible fade show";
+    alert.role = "alert";
+    alert.innerHTML = `
+      You have been signed out successfully.
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    alertContainer.appendChild(alert);
+    console.log("Sign-out success message shown");
+  }
+}
 
 // Initialize auth state
 const initAuth = () => {
@@ -374,15 +525,11 @@ const initAuth = () => {
           authContainer.style.display = "none";
         }
 
-        // Update the rest of the UI
-        updateUI();
+        // Make sure all shopping list elements are visible
+        showShoppingListUI();
 
-        // Fetch user-specific data
-        if (typeof getList === "function") {
-          getList();
-        } else {
-          console.warn("getList function not found");
-        }
+        // Update any other UI elements
+        updateUI();
       } catch (error) {
         console.error("Sign-in error:", error);
         showAlert(
@@ -460,6 +607,179 @@ function handleSignOut() {
   // Show alert
   showAlert("You have been signed out successfully.", "info");
 }
+
+// Direct approach to change UI after sign-in
+function forceShowShoppingUI() {
+  console.log("FORCING UI CHANGE: Showing shopping list UI");
+
+  // Hide auth container with !important
+  const authContainer = document.getElementById("auth-container");
+  if (authContainer) {
+    authContainer.style.display = "none";
+    authContainer.style.visibility = "hidden"; // Add extra hiding
+    console.log("Auth container forcibly hidden");
+  }
+
+  // Show all shopping list elements with appropriate display
+  const boxElements = document.querySelectorAll(".box.auth-required");
+  boxElements.forEach((el) => {
+    el.style.display = "block";
+    el.style.visibility = "visible";
+    console.log("Shopping list box displayed");
+  });
+
+  // Tables need display:table
+  const tableElements = document.querySelectorAll("table.auth-required");
+  tableElements.forEach((el) => {
+    el.style.display = "table";
+    el.style.visibility = "visible";
+    console.log("Shopping list table displayed");
+  });
+
+  // Other elements need display:block
+  const otherElements = document.querySelectorAll(
+    ".auth-required:not(table):not(.box)"
+  );
+  otherElements.forEach((el) => {
+    el.style.display = "block";
+    el.style.visibility = "visible";
+    console.log("Other shopping list elements displayed");
+  });
+
+  // Show user info and ensure username is displayed
+  const signedInUser = document.getElementById("signed-in-user");
+  if (signedInUser) {
+    signedInUser.style.display = "flex"; // Using flex for alignment
+    signedInUser.style.visibility = "visible";
+    console.log("User info displayed");
+
+    // Make sure username is displayed
+    if (typeof window.enhanceUsernameDisplay === "function") {
+      window.enhanceUsernameDisplay();
+    } else {
+      // Fallback if enhanced function isn't available
+      const username = localStorage.getItem("username");
+      const usernameDisplay = document.getElementById("username-display");
+      if (username && usernameDisplay) {
+        usernameDisplay.textContent = username;
+        console.log("Username display updated to:", username);
+      }
+    }
+  }
+
+  // Try to load shopping list data
+  setTimeout(function () {
+    if (typeof window.getList === "function") {
+      window.getList();
+      console.log("Attempting to load shopping list data");
+    } else if (typeof getList === "function") {
+      getList();
+      console.log("Attempting to load shopping list data");
+    } else {
+      console.warn("getList function not available");
+    }
+  }, 500);
+}
+
+// Direct override of the sign-in form submission
+document.addEventListener("DOMContentLoaded", function () {
+  console.log("Setting up direct form submission handler");
+
+  const signInForm = document.getElementById("sign-in-form");
+  if (signInForm) {
+    // Replace existing handlers with our direct one
+    signInForm.addEventListener(
+      "submit",
+      function (e) {
+        e.preventDefault();
+
+        const username = document.getElementById("signin-username").value;
+        const password = document.getElementById("signin-password").value;
+
+        console.log("Direct sign-in handler: Attempting login for", username);
+
+        // Use FormData for the request
+        const formData = new FormData();
+        formData.append("username", username);
+        formData.append("password", password);
+
+        // Create and send request
+        const xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              try {
+                const response = JSON.parse(xhr.responseText);
+
+                // Store authentication data
+                localStorage.setItem("access_token", response.access_token);
+                localStorage.setItem("username", username);
+
+                console.log("Login successful! Forcing UI change");
+
+                // Make sure the username is displayed
+                if (typeof window.enhanceUsernameDisplay === "function") {
+                  window.enhanceUsernameDisplay();
+                } else {
+                  // Fallback if enhanced function isn't available
+                  const usernameDisplay =
+                    document.getElementById("username-display");
+                  if (usernameDisplay) {
+                    usernameDisplay.textContent = username;
+                  }
+
+                  // Make sure the user info container is shown
+                  const signedInUser =
+                    document.getElementById("signed-in-user");
+                  if (signedInUser) {
+                    signedInUser.style.display = "flex";
+                  }
+                }
+
+                // Add a small delay to ensure DOM updates
+                setTimeout(forceShowShoppingUI, 100);
+
+                // Show success message
+                const alertContainer =
+                  document.getElementById("alert-container");
+                if (alertContainer) {
+                  const alert = document.createElement("div");
+                  alert.className =
+                    "alert alert-success alert-dismissible fade show";
+                  alert.innerHTML = `Welcome back, ${username}! <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+                  alertContainer.appendChild(alert);
+                }
+              } catch (e) {
+                console.error("Error processing login response:", e);
+                alert("Error logging in. Please try again.");
+              }
+            } else {
+              console.error("Login failed with status:", xhr.status);
+              alert("Login failed. Please check your credentials.");
+            }
+          }
+        };
+
+        xhr.open("POST", "/users/sign-in", true);
+        xhr.send(formData);
+      },
+      true
+    ); // Use capture to ensure our handler runs first
+
+    console.log("Direct form submission handler installed");
+  } else {
+    console.error("Could not find sign-in form!");
+  }
+
+  // Check if already logged in
+  if (localStorage.getItem("access_token")) {
+    console.log("User already logged in, forcing UI update");
+    setTimeout(forceShowShoppingUI, 100);
+  }
+});
+
+// Expose the function globally
+window.forceShowShoppingUI = forceShowShoppingUI;
 
 // Expose functions to window object
 window.auth = {

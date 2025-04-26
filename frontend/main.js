@@ -68,6 +68,11 @@ function showAuthUI() {
   }
 }
 
+// Expose functions globally
+window.getList = getList;
+window.showAuthUI = showAuthUI;
+window.hideAuthUI = hideAuthUI;
+
 const addPrice = (list) => {
   let total_price = 0;
   const p = document.getElementById("update-price");
@@ -238,6 +243,50 @@ const deleteItem = (name) => {
   xhr.send();
 };
 
+// Function to get list data from server
+const getList = () => {
+  if (!checkAuthReady()) {
+    console.error("Auth module not ready, cannot fetch list");
+    return;
+  }
+
+  console.log("Fetching shopping list data from server");
+
+  const xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 200) {
+        try {
+          const list = JSON.parse(xhr.responseText);
+          console.log("Shopping list data received:", list);
+          displayList(list);
+        } catch (e) {
+          console.error("Error parsing list data:", e);
+          window.auth.showAlert("Error loading your shopping list", "danger");
+        }
+      } else if (xhr.status == 401) {
+        console.error("Unauthorized when fetching list");
+        window.auth.showAlert(
+          "Your session has expired. Please sign in again.",
+          "warning"
+        );
+        showAuthUI(); // Function defined elsewhere to show auth UI
+      } else {
+        console.error("Error fetching list", xhr.status, xhr.responseText);
+        window.auth.showAlert(
+          "Error loading shopping list: " +
+            (xhr.status === 0 ? "Network error" : xhr.status),
+          "danger"
+        );
+      }
+    }
+  };
+
+  xhr.open("GET", api, true);
+  window.auth.addAuthHeader(xhr);
+  xhr.send();
+};
+
 const displayList = (list) => {
   if (!list || !Array.isArray(list)) {
     console.warn("Invalid list data", list);
@@ -258,7 +307,7 @@ const displayList = (list) => {
   if (list.length === 0) {
     // If the list is empty, show a message
     tbody.innerHTML = `<tr><td colspan="5" class="text-center">No items in your shopping list</td></tr>`;
-    updateTotalPrice([]);
+    addPrice([]); // Update total price to zero
     return;
   }
 
