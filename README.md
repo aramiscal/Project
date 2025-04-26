@@ -19,3 +19,13 @@
 - Checks if the username or email has been used already (i.e. is in the collection already)
 - Password and email form control
 - User-specific Personal Lists
+
+# Sign in/Sign up UI
+<img width="1395" alt="Screenshot 2025-04-25 at 9 46 46 PM" src="https://github.com/user-attachments/assets/a86cbbcc-e14a-4c4c-930c-5faa1c4b9759" />
+<img width="1414" alt="Screenshot 2025-04-25 at 9 46 35 PM" src="https://github.com/user-attachments/assets/f6e0aef2-9fa7-4835-bb8d-2de7315edb42" />
+# User-specific Lists
+<img width="1246" alt="Screenshot 2025-04-25 at 9 47 43 PM" src="https://github.com/user-attachments/assets/a23c5c15-979d-495<img width="1256" alt="Screenshot 2025-04-25 at 9 47 21 PM" src="https://github.com/user-attachments/assets/e1c42b57-6141-4f9f-bfe8-065aaf4a087f" />
+5-8f3f-c9e057723085" />
+# MongoDB Collections
+<img width="1121" alt="Screenshot 2025-04-25 at 9 48 19 PM" src="https://github.com/user-attachments/assets/84493c8a-8592-46db-8db8-617cea77f25d" />
+<img width="1102" alt="Screenshot 2025-04-25 at 9 48 32 PM" src="https://github.com/user-attachments/assets/349de93a-25f2-4967-8571-ae98388af353" />
