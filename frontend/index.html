@@ -95,6 +95,63 @@
         display: block !important; /* Force block display when visible */
       }
 
+      /* Make sure tables display correctly */
+      table.auth-required {
+        display: none; /* Initially hidden */
+      }
+
+      table.auth-required.visible,
+      .authenticated table.auth-required {
+        display: table !important; /* Force table display when visible */
+        width: 65% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        visibility: visible !important;
+      }
+
+      /* Fix for boxes */
+      .box.auth-required {
+        display: none; /* Initially hidden */
+      }
+
+      .box.auth-required.visible,
+      .authenticated .box.auth-required {
+        display: block !important;
+        visibility: visible !important;
+      }
+
+      /* Other authenticated elements */
+      .auth-required:not(table):not(.box) {
+        display: none; /* Initially hidden */
+      }
+
+      .auth-required:not(table):not(.box).visible,
+      .authenticated .auth-required:not(table):not(.box) {
+        display: block !important;
+        visibility: visible !important;
+      }
+
+      /* Show the signed-in user info when authenticated */
+      .authenticated #signed-in-user {
+        display: flex !important;
+        visibility: visible !important;
+      }
+
+      /* Hide auth container when authenticated */
+      .authenticated #auth-container {
+        display: none !important;
+        visibility: hidden !important;
+      }
+
+      /* Add authenticated class to body when user is logged in */
+      body.authenticated .auth-required {
+        display: initial !important;
+      }
+
+      body.authenticated table.auth-required {
+        display: table !important;
+      }
+
       /* Alert styling for faster alerts */
       #alert-container {
         position: fixed;
@@ -1298,6 +1355,36 @@
         // Initialize fix
         fixAuth();
       });
+    </script>
+    <script>
+      // Add this helper function to manage the authenticated class on the body
+      function updateBodyClass() {
+        if (localStorage.getItem("access_token")) {
+          document.body.classList.add("authenticated");
+        } else {
+          document.body.classList.remove("authenticated");
+        }
+      }
+      
+      // Check on page load
+      document.addEventListener("DOMContentLoaded", function() {
+        updateBodyClass();
+        
+        // Check authentication state and apply appropriate UI
+        if (typeof window.checkAuthState === "function") {
+          window.checkAuthState();
+        }
+      });
+      
+      // Update when auth state changes
+      window.addEventListener("storage", function(e) {
+        if (e.key === "access_token") {
+          updateBodyClass();
+        }
+      });
+      
+      // Also check periodically
+      setInterval(updateBodyClass, 2000);
     </script>
   </body>
 </html>
