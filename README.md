@@ -13,3 +13,9 @@
 - Input values clear once "Add Item" is clicked
 - Table is sorted by Type or "Aisle"
 - Total cost updates when you add or delete an item
+
+## HW 4 Functionalities
+- Sign In/Sign Up UI
+- Checks if the username or email has been used already (i.e. is in the collection already)
+- Password and email form control
+- User-specific Personal Lists
