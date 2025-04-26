@@ -1,15 +1,15 @@
 from datetime import datetime
 from typing import Annotated
-from beanie import WriteRules
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
-from pydantic import ValidationError
 
 from api.auth.jwt_auth import Token, TokenData, create_access_token, decode_jwt_token
 from api.models.user import User, UserRequest, UserResponse
 
+# Password hashing configuration
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 class HashPassword:
     def create_hash(self, password: str):
@@ -18,28 +18,34 @@ class HashPassword:
     def verify_hash(self, input_password: str, hashed_password: str):
         return pwd_context.verify(input_password, hashed_password)
 
+
+# OAuth setup
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 hash_password = HashPassword()
+
 
 def get_user(token: Annotated[str, Depends(oauth2_scheme)]) -> TokenData:
     return decode_jwt_token(token)
 
+
 user_router = APIRouter()
+
 
 @user_router.post("/signup", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def sign_up(user: UserRequest, response: Response):
+    """Create a new user account"""
     try:
-        # Get direct MongoDB access
+        # Get database access
         db = User.get_motor_collection().database
-        users_collection = db["users"]  # Explicitly use string name
+        users_collection = db["users"]
 
-        # Check if username already exists using direct query
+        # Check if username already exists
         existing_user = await users_collection.find_one({"username": user.username})
         if existing_user:
             response.status_code = status.HTTP_400_BAD_REQUEST
             return {"detail": "User already exists"}
 
-        # Check if email already exists using direct query
+        # Check if email already exists
         existing_email = await users_collection.find_one({"email": user.email})
         if existing_email:
             response.status_code = status.HTTP_400_BAD_REQUEST
@@ -48,47 +54,41 @@ async def sign_up(user: UserRequest, response: Response):
         # Hash the password
         hashed_pwd = hash_password.create_hash(user.password)
 
-        # Create user document directly
-        current_time = datetime.utcnow()
+        # Create user document
         new_user_doc = {
             "username": user.username,
             "email": user.email,
             "password": hashed_pwd,
             "role": "user",
-            "created_at": current_time,
+            "created_at": datetime.utcnow(),
             "last_login": None,
         }
 
-        try:
-            # Insert directly into MongoDB
-            result = await users_collection.insert_one(new_user_doc)
+        # Insert into MongoDB
+        result = await users_collection.insert_one(new_user_doc)
 
-            if result and hasattr(result, "inserted_id") and result.inserted_id:
-                return {"message": "User created successfully"}
-            else:
-                response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-                return {
-                    "detail": "Failed to create user: Insert operation returned no ID"
-                }
-
-        except Exception as db_error:
+        if result and result.inserted_id:
+            return {"message": "User created successfully"}
+        else:
             response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-            return {"detail": f"Database error: {str(db_error)}"}
+            return {"detail": "Failed to create user: Insert operation returned no ID"}
 
     except Exception as e:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"detail": f"Failed to create user: {str(e)}"}
 
+
 @user_router.post("/sign-in", response_model=Token)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()], response: Response
 ) -> Token:
+    """Authenticate user and return JWT token"""
     try:
-        # Get direct access to database
+        # Get database access
         db = User.get_motor_collection().database
         users_collection = db["users"]
 
-        # Find the user in the database using direct query
+        # Find the user
         username = form_data.username
         existing_user_doc = await users_collection.find_one({"username": username})
 
@@ -133,8 +133,10 @@ async def login_for_access_token(
             "detail": f"Sign-in error: {str(e)}",
         }
 
+
 @user_router.get("/me", response_model=UserResponse)
 async def get_current_user(token_data: Annotated[TokenData, Depends(get_user)]):
+    """Get the current user's profile information"""
     try:
         # Use direct MongoDB access
         db = User.get_motor_collection().database

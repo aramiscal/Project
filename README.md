@@ -19,3 +19,4 @@
 - Checks if the username or email has been used already (i.e. is in the collection already)
 - Password and email form control
 - User-specific Personal Lists
+

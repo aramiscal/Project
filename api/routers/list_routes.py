@@ -5,10 +5,12 @@ from fastapi.security import OAuth2PasswordBearer
 from api.auth.jwt_auth import TokenData, decode_jwt_token
 from api.models.list import Item, ListRequest
 
+# OAuth setup
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/sign-in")
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> TokenData:
+    """Verify JWT token and return user data"""
     token_data = decode_jwt_token(token)
     if token_data is None:
         raise HTTPException(
@@ -27,7 +29,6 @@ async def get_items(
     current_user: Annotated[TokenData, Depends(get_current_user)],
 ) -> List[Item]:
     """Get items for the current user only"""
-    # Filter items by the current user's username
     return await Item.find(Item.user_id == current_user.username).to_list()
 
 
@@ -37,15 +38,15 @@ async def add_item(
     current_user: Annotated[TokenData, Depends(get_current_user)],
 ) -> Item:
     """Add an item for the current user"""
-    newItem = Item(
+    new_item = Item(
         name=list_item.name,
         type=list_item.type,
         quantity=list_item.quantity,
         price=list_item.price,
         user_id=current_user.username,  # Associate the item with the current user
     )
-    await Item.insert_one(newItem)
-    return newItem
+    await Item.insert_one(new_item)
+    return new_item
 
 
 @list_router.delete("/{name}")
