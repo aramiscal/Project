@@ -29,7 +29,7 @@ function hideAuthUI() {
   // Show signed-in user info
   const signedInUser = document.getElementById("signed-in-user");
   if (signedInUser) {
-    signedInUser.style.display = "block";
+    signedInUser.style.display = "flex"; // Changed to flex for better alignment
   }
 }
 
@@ -67,11 +67,6 @@ function showAuthUI() {
     signedInUser.style.display = "none";
   }
 }
-
-// Expose functions globally
-window.getList = getList;
-window.showAuthUI = showAuthUI;
-window.hideAuthUI = hideAuthUI;
 
 const addPrice = (list) => {
   let total_price = 0;
@@ -122,7 +117,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (checkAuthReady() && window.auth.isLoggedIn()) {
     console.log("User is logged in, initializing UI");
     hideAuthUI();
-    getList();
+    getList(); // Will now fetch only the current user's items
   } else {
     console.log("User is not logged in, showing auth UI");
     showAuthUI();
@@ -134,8 +129,73 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
+// Function to get list data from server (now user-specific)
+const getList = () => {
+  if (!checkAuthReady()) {
+    console.error("Auth module not ready, cannot fetch list");
+    return;
+  }
+
+  // Check if user is logged in
+  if (!window.auth.isLoggedIn()) {
+    console.warn("User is not logged in, cannot fetch list");
+    showAuthUI();
+    return;
+  }
+
+  console.log("Fetching user-specific shopping list data from server");
+
+  const xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 200) {
+        try {
+          const list = JSON.parse(xhr.responseText);
+          console.log(
+            `Shopping list data received for user ${window.auth.getUsername()}:`,
+            list
+          );
+          displayList(list);
+        } catch (e) {
+          console.error("Error parsing list data:", e);
+          window.auth.showAlert("Error loading your shopping list", "danger");
+        }
+      } else if (xhr.status == 401) {
+        console.error("Unauthorized when fetching list");
+        window.auth.showAlert(
+          "Your session has expired. Please sign in again.",
+          "warning"
+        );
+        showAuthUI();
+      } else {
+        console.error("Error fetching list", xhr.status, xhr.responseText);
+        window.auth.showAlert(
+          "Error loading shopping list: " +
+            (xhr.status === 0 ? "Network error" : xhr.status),
+          "danger"
+        );
+      }
+    }
+  };
+
+  xhr.open("GET", api, true);
+  window.auth.addAuthHeader(xhr); // This will include the user's token
+  xhr.send();
+};
+
 const postItem = () => {
   if (!checkAuthReady()) return;
+
+  // Check if user is logged in
+  if (!window.auth.isLoggedIn()) {
+    console.warn("User is not logged in, cannot add item");
+    window.auth.showAlert(
+      "Please sign in to add items to your list",
+      "warning"
+    );
+    showAuthUI();
+    return;
+  }
 
   const nameInput = document.getElementById("new-name");
   const quantityInput = document.getElementById("new-quantity");
@@ -155,7 +215,11 @@ const postItem = () => {
   // Check if all required fields are filled
   if (!name || !quantity || type === "Choose..." || !price) {
     // Show alert if fields are not filled
-    window.auth.showAlert("All fields are required", "danger");
+    if (typeof window.quickAlert === "function") {
+      window.quickAlert("All fields are required", "danger");
+    } else {
+      window.auth.showAlert("All fields are required", "danger");
+    }
     return;
   }
 
@@ -164,43 +228,85 @@ const postItem = () => {
 
   // Validate numeric values
   if (isNaN(quantityToInt) || quantityToInt <= 0) {
-    window.auth.showAlert("Quantity must be a positive number", "danger");
+    if (typeof window.quickAlert === "function") {
+      window.quickAlert("Quantity must be a positive number", "danger");
+    } else {
+      window.auth.showAlert("Quantity must be a positive number", "danger");
+    }
     return;
   }
 
   if (isNaN(priceToFloat) || priceToFloat <= 0) {
-    window.auth.showAlert("Price must be a positive number", "danger");
+    if (typeof window.quickAlert === "function") {
+      window.quickAlert("Price must be a positive number", "danger");
+    } else {
+      window.auth.showAlert("Price must be a positive number", "danger");
+    }
     return;
   }
+
+  // Debug logging
+  console.log("Sending item data to server:", {
+    name,
+    type,
+    quantity: quantityToInt,
+    price: priceToFloat,
+  });
 
   const xhr = new XMLHttpRequest();
   xhr.onreadystatechange = () => {
     if (xhr.readyState == 4) {
+      console.log("Server response status:", xhr.status);
       if (xhr.status == 201) {
-        getList();
+        getList(); // Will now fetch only the current user's items
         resetInput();
-        window.auth.showAlert("Item added successfully!", "success");
+        if (typeof window.quickAlert === "function") {
+          window.quickAlert("Item added to your personal list!", "success");
+        } else {
+          window.auth.showAlert("Item added to your personal list!", "success");
+        }
       } else if (xhr.status == 401) {
         console.error("Unauthorized when adding item");
-        window.auth.showAlert(
-          "Your session has expired. Please sign in again.",
-          "warning"
-        );
+        if (typeof window.quickAlert === "function") {
+          window.quickAlert(
+            "Your session has expired. Please sign in again.",
+            "warning"
+          );
+        } else {
+          window.auth.showAlert(
+            "Your session has expired. Please sign in again.",
+            "warning"
+          );
+        }
         showAuthUI();
       } else {
         console.error("Error adding item", xhr.status, xhr.responseText);
-        window.auth.showAlert(
-          "Error adding item: " +
-            (xhr.status === 0 ? "Network error" : xhr.status),
-          "danger"
-        );
+        try {
+          const errorResponse = JSON.parse(xhr.responseText);
+          console.error("Server error details:", errorResponse);
+        } catch (e) {
+          console.error("Could not parse error response");
+        }
+        if (typeof window.quickAlert === "function") {
+          window.quickAlert(
+            "Error adding item: " +
+              (xhr.status === 0 ? "Network error" : xhr.status),
+            "danger"
+          );
+        } else {
+          window.auth.showAlert(
+            "Error adding item: " +
+              (xhr.status === 0 ? "Network error" : xhr.status),
+            "danger"
+          );
+        }
       }
     }
   };
 
   xhr.open("POST", api, true);
   xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-  window.auth.addAuthHeader(xhr);
+  window.auth.addAuthHeader(xhr); // This will include the user's token
   xhr.send(
     JSON.stringify({
       name: name,
@@ -214,12 +320,23 @@ const postItem = () => {
 const deleteItem = (name) => {
   if (!checkAuthReady()) return;
 
+  // Check if user is logged in
+  if (!window.auth.isLoggedIn()) {
+    console.warn("User is not logged in, cannot delete item");
+    window.auth.showAlert("Please sign in to manage your list", "warning");
+    showAuthUI();
+    return;
+  }
+
   const xhr = new XMLHttpRequest();
   xhr.onreadystatechange = () => {
     if (xhr.readyState == 4) {
       if (xhr.status == 200) {
-        getList();
-        window.auth.showAlert("Item deleted successfully!", "success");
+        getList(); // Will now fetch only the current user's items
+        window.auth.showAlert(
+          "Item deleted from your personal list!",
+          "success"
+        );
       } else if (xhr.status == 401) {
         console.error("Unauthorized when deleting item");
         window.auth.showAlert(
@@ -227,6 +344,14 @@ const deleteItem = (name) => {
           "warning"
         );
         showAuthUI();
+      } else if (xhr.status == 404) {
+        console.error("Item not found or doesn't belong to user");
+        window.auth.showAlert(
+          "This item wasn't found in your personal list.",
+          "warning"
+        );
+        // Refresh the list to ensure UI is in sync with server
+        getList();
       } else {
         console.error("Error deleting item", xhr.status, xhr.responseText);
         window.auth.showAlert(
@@ -239,51 +364,7 @@ const deleteItem = (name) => {
   };
 
   xhr.open("DELETE", `${api}/${name}`, true);
-  window.auth.addAuthHeader(xhr);
-  xhr.send();
-};
-
-// Function to get list data from server
-const getList = () => {
-  if (!checkAuthReady()) {
-    console.error("Auth module not ready, cannot fetch list");
-    return;
-  }
-
-  console.log("Fetching shopping list data from server");
-
-  const xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = () => {
-    if (xhr.readyState == 4) {
-      if (xhr.status == 200) {
-        try {
-          const list = JSON.parse(xhr.responseText);
-          console.log("Shopping list data received:", list);
-          displayList(list);
-        } catch (e) {
-          console.error("Error parsing list data:", e);
-          window.auth.showAlert("Error loading your shopping list", "danger");
-        }
-      } else if (xhr.status == 401) {
-        console.error("Unauthorized when fetching list");
-        window.auth.showAlert(
-          "Your session has expired. Please sign in again.",
-          "warning"
-        );
-        showAuthUI(); // Function defined elsewhere to show auth UI
-      } else {
-        console.error("Error fetching list", xhr.status, xhr.responseText);
-        window.auth.showAlert(
-          "Error loading shopping list: " +
-            (xhr.status === 0 ? "Network error" : xhr.status),
-          "danger"
-        );
-      }
-    }
-  };
-
-  xhr.open("GET", api, true);
-  window.auth.addAuthHeader(xhr);
+  window.auth.addAuthHeader(xhr); // This will include the user's token
   xhr.send();
 };
 
@@ -306,8 +387,8 @@ const displayList = (list) => {
 
   if (list.length === 0) {
     // If the list is empty, show a message
-    tbody.innerHTML = `<tr><td colspan="5" class="text-center">No items in your shopping list</td></tr>`;
-    addPrice([]); // Update total price to zero
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center">No items in your personal shopping list</td></tr>`;
+    addPrice([]);
     return;
   }
 
@@ -335,3 +416,8 @@ const displayList = (list) => {
   // Update total price
   addPrice(list);
 };
+
+// Expose functions globally
+window.getList = getList;
+window.showAuthUI = showAuthUI;
+window.hideAuthUI = hideAuthUI;
